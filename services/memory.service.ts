@@ -16,7 +16,8 @@ export class JsonMemoryService implements Memory {
 
   return raw.map((e: any) => ({
     ...e,
-    createdAt: new Date(e.createdAt)
+    createdAt: new Date(e.createdAt),
+    embedding: e.embedding || []
   }))
   }
 
