@@ -21,7 +21,7 @@ async function main() {
   const prompts = new FilePromptManager()
 
   //const repo = new SQLiteEntryRepository()
-  const memory = new JsonMemoryService()
+  //const memory = new JsonMemoryService()
 
   const generator = new AIGenerator(llm, prompts)
   const reflector = new AIReflector(llm, prompts)
@@ -30,8 +30,7 @@ async function main() {
   const publisher = new ConsolePublisher()
   //const embedding = new OpenAIEmbeddingService(llm)
   const embedding = new OllamaEmbeddingService(llm)
-
-const memory = new JsonMemoryService(embedding)
+  const memory = new JsonMemoryService(embedding)
 
   const engine = new JournalEngine(
     memory,
