@@ -3,13 +3,14 @@ import { Reflector } from "../interfaces/reflector"
 import { Entry } from "../domain/entry"
 import { Context } from "../domain/context"
 import { Reflection } from "../domain/reflection"
-import { OpenAIClient } from "../infra/llm/openai.client"
+//import { OpenAIClient } from "../infra/llm/openai.client"
 import { FilePromptManager } from "./prompt.service"
+import { OllamaClient } from "../infra/llm/ollama.client"
 import { v4 as uuid } from "uuid"
 
 export class AIReflector implements Reflector {
   constructor(
-    private llm: OpenAIClient,
+    private llm: OllamaClient,
     private prompts: FilePromptManager
   ) {}
 
