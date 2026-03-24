@@ -16,8 +16,8 @@ export class AIGenerator implements Generator {
   async generate(context: Context): Promise<Entry> {
     const prompt = await this.prompts.getPrompt("generation")
 
-    const input = `${prompt.template}
     const recent = context.recentEntries || []
+    const input = `${prompt.template}
     
     Context:
     ${recent.map(e => e.content).join("\n")}
