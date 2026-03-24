@@ -9,8 +9,14 @@ export class JsonMemoryService implements Memory {
   private file = "./data/entries.json"
 
   private read(): Entry[] {
-    if (!fs.existsSync(this.file)) return []
-    return JSON.parse(fs.readFileSync(this.file, "utf-8"))
+  if (!fs.existsSync(this.file)) return []
+
+  const raw = JSON.parse(fs.readFileSync(this.file, "utf-8"))
+
+  return raw.map((e: any) => ({
+    ...e,
+    createdAt: new Date(e.createdAt)
+  }))
   }
 
   private write(entries: Entry[]) {
