@@ -1,4 +1,3 @@
-// ---------- /core/journalEngine.ts ----------
 import { Memory } from "../interfaces/memory"
 import { Generator } from "../interfaces/generator"
 import { Reflector } from "../interfaces/reflector"
@@ -20,19 +19,29 @@ export class JournalEngine {
     const context = await this.memory.buildContext()
 
     const entry = await this.generator.generate(context)
-    entry.embedding = await this.embedding.embed(entry.content)
 
-    entry.embedding = await this.embedding.embed(entry.content)
+    // --- Embedding (с проверкой) ---
+    const embedding = await this.embedding.embed(entry.content)
 
+    if (!embedding || embedding.length === 0) {
+      throw new Error("Embedding failed: empty vector")
+    }
+
+    entry.embedding = embedding
+
+    // --- Reflection ---
     const reflection = await this.reflector.reflect(entry, context)
 
+    // --- Evaluation ---
     const evaluation = await this.evaluator.evaluate(entry)
 
     if (!evaluation.valid) return
 
+    // --- Persistence ---
     await this.memory.storeEntry(entry)
     await this.memory.storeReflection(reflection)
 
+    // --- Output ---
     await this.publisher.publish(entry, "console")
   }
 }
