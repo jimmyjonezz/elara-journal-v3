@@ -19,8 +19,11 @@ export class AIGenerator implements Generator {
     const recent = context.recentEntries || []
     const input = `${prompt.template}
     
-    Context:
+    Recent:
     ${recent.map(e => e.content).join("\n")}
+    
+    Relevant past:
+    ${semantic.map(e => e.content).join("\n")}
     `
 
     const content = await this.llm.generate(input)
