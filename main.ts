@@ -10,12 +10,14 @@ import { AIReflector } from "./services/reflector.service"
 import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 
-import { OpenAIClient } from "./infra/llm/openai.client"
+//import { OpenAIClient } from "./infra/llm/openai.client"
 import { OpenAIEmbeddingService } from "./services/embedding.service"
 import { FilePromptManager } from "./services/prompt.service"
+import { OllamaClient } from "./infra/llm/ollama.client"
 
 async function main() {
-  const llm = new OpenAIClient()
+  //const llm = new OpenAIClient()
+  const llm = new OllamaClient()
   const prompts = new FilePromptManager()
 
   //const repo = new SQLiteEntryRepository()
