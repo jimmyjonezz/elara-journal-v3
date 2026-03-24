@@ -1,15 +1,21 @@
 // ---------- /services/reflector.service.ts ----------
-import { Reflector } from "../interfaces/reflector"
-import { Entry } from "../domain/entry"
-import { Context } from "../domain/context"
-import { Reflection } from "../domain/reflection"
+export class AIReflector {
+  constructor(
+    private llm: OpenAIClient,
+    private prompts: FilePromptManager
+  ) {}
 
-export class MockReflector implements Reflector {
-  async reflect(entry: Entry): Promise<Reflection> {
+  async reflect(entry) {
+    const prompt = await this.prompts.getPrompt("reflection")
+
+    const input = `${prompt.template}\n\n${entry.content}`
+
+    const analysis = await this.llm.generate(input)
+
     return {
-      id: Math.random().toString(),
+      id: crypto.randomUUID(),
       entryId: entry.id,
-      analysis: "Reflection",
+      analysis,
       selfScore: 0.5,
       createdAt: new Date()
     }
