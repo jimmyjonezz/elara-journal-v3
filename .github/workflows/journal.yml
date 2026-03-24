@@ -2,7 +2,7 @@ name: Elara Journal
 
 on:
   schedule:
-    - cron: "* 9 * * *"
+    - cron: "0 9 * * *"
   workflow_dispatch:
 
 jobs:
