@@ -35,7 +35,7 @@ export class JsonMemoryService implements Memory {
       .slice(0, limit)
   }
 
-  async store(entry: Entry): Promise<void> {
+  async storeEntry(entry: Entry): Promise<void> {
     const entries = this.read()
     entries.push(entry)
     this.write(entries)
