@@ -32,7 +32,7 @@ export class OllamaClient {
   async embed(text: string): Promise<number[]> {
     try {
       const res: any = await this.client.embeddings({
-        model: "nomic-embed-text:latest",
+        model: "ollama pull nomic-embed-text-v2-moe",
         prompt: text
       })
 
