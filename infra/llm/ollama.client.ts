@@ -37,8 +37,10 @@ export class OllamaClient {
       })
 
       return res.embedding || []
-    } catch {
-      return []
+    } catch (e: any) {
+      console.error("EMBED ERROR:", e?.message || e)
+        throw e
+    }
     }
   }
 }
