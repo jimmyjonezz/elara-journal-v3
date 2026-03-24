@@ -4,10 +4,4 @@ export type Entry = {
   content: string
   createdAt: Date
   embedding: number[]
-  meta?: {
-    mood?: string
-    topic?: string
-    tags?: string[]
-  }
-  score?: number
 }
