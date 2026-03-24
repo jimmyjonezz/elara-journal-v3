@@ -6,3 +6,7 @@ export type EvaluationResult = {
   score: number
   issues: string[]
 }
+
+export interface Evaluator {
+  evaluate(entry: Entry): Promise<EvaluationResult>
+}
