@@ -1,0 +1,38 @@
+name: Elara Journal
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install
+
+      - name: Run journal
+        run: npx ts-node main.ts
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Commit changes
+        run: |
+          git config user.name "elara-bot"
+          git config user.email "bot@elara.ai"
+          git add data/entries.json
+          git commit -m "Update journal entries" || echo "No changes"
+          git push
