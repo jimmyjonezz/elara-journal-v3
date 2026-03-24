@@ -28,7 +28,10 @@ async function main() {
 
   const evaluator = new SimpleEvaluator()
   const publisher = new ConsolePublisher()
-  const embedding = new OpenAIEmbeddingService(llm)
+  //const embedding = new OpenAIEmbeddingService(llm)
+  const embedding = new OllamaEmbeddingService(llm)
+
+const memory = new JsonMemoryService(embedding)
 
   const engine = new JournalEngine(
     memory,
