@@ -20,6 +20,7 @@ export class JournalEngine {
     const context = await this.memory.buildContext()
 
     const entry = await this.generator.generate(context)
+    entry.embedding = await this.embedding.embed(entry.content)
 
     entry.embedding = await this.embedding.embed(entry.content)
 
