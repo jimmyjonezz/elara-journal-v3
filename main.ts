@@ -11,7 +11,7 @@ import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 
 //import { OpenAIClient } from "./infra/llm/openai.client"
-import { OpenAIEmbeddingService } from "./services/embedding.service"
+import { OllamaEmbeddingService } from "./services/embedding.service"
 import { FilePromptManager } from "./services/prompt.service"
 import { OllamaClient } from "./infra/llm/ollama.client"
 
