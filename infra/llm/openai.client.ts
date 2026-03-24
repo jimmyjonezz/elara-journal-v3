@@ -1,4 +1,4 @@
-infra/llm/openai.client.ts
+//infra/llm/openai.client.ts
 import OpenAI from "openai"
 import * as dotenv from "dotenv"
 
