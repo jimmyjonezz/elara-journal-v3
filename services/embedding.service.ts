@@ -3,7 +3,7 @@ import { EmbeddingService } from "../interfaces/embedding"
 //import { OpenAIClient } from "../infra/llm/openai.client"
 import { OllamaClient } from "../infra/llm/ollama.client"
 
-export class OpenAIEmbeddingService implements EmbeddingService {
+export class OllamaEmbeddingService implements EmbeddingService {
   constructor(private embedding: EmbeddingService) {}
 
   async embed(text: string): Promise<number[]> {
