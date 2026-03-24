@@ -22,8 +22,8 @@ export class JsonMemoryService implements Memory {
     return entries.slice(-limit)
   }
 
-  async searchSemantic(): Promise<Entry[]> {
-    return []
+  async searchSemantic(query: string, limit: number): Promise<Entry[]> {
+  return []
   }
 
   async storeEntry(entry: Entry): Promise<void> {
