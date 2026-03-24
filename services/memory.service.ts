@@ -3,6 +3,7 @@ import { Memory } from "../interfaces/memory"
 import { Entry } from "../domain/entry"
 import { Reflection } from "../domain/reflection"
 import { Context } from "../domain/context"
+import { cosineSimilarity } from "./vector.utils"
 import * as fs from "fs"
 
 export class JsonMemoryService implements Memory {
@@ -29,7 +30,23 @@ export class JsonMemoryService implements Memory {
   }
 
   async searchSemantic(query: string, limit: number): Promise<Entry[]> {
-  return []
+  const entries = this.read()
+
+  if (!entries.length) return []
+
+  const queryEmbedding = await this.embedding.embed(query)
+
+  const scored = entries
+    .filter(e => e.embedding && e.embedding.length)
+    .map(e => ({
+      entry: e,
+      score: cosineSimilarity(queryEmbedding, e.embedding)
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map(e => e.entry)
+
+  return scored
   }
 
   async storeEntry(entry: Entry): Promise<void> {
