@@ -17,8 +17,11 @@ export class AIGenerator implements Generator {
     const prompt = await this.prompts.getPrompt("generation")
 
     const input = `${prompt.template}
+    const recent = context.recentEntries || []
     
-    Context:${recent.map(e => e.content).join("\n")}`
+    Context:
+    ${recent.map(e => e.content).join("\n")}
+    `
 
     const content = await this.llm.generate(input)
 
