@@ -1,15 +1,21 @@
 import fs from "fs"
 import path from "path"
 
+// Импорт интерфейсов и типов
 import { Memory } from "../interfaces/memory"
 import { Entry } from "../domain/entry"
-import { cosineSimilarity } from "./vector.utils"
+import { Reflection } from "../domain/reflection"
+import { Context } from "../domain/context"
 import { EmbeddingService } from "../interfaces/embedding"
+import { cosineSimilarity } from "./vector.utils"
 
 export class JsonMemoryService implements Memory {
   private filePath = path.resolve("data/entries.json")
+  private reflectionPath = path.resolve("data/reflections.json")
 
   constructor(private embedding: EmbeddingService) {}
+
+  // ==================== PRIVATE HELPERS ====================
 
   private read(): Entry[] {
     if (!fs.existsSync(this.filePath)) return []
@@ -28,6 +34,18 @@ export class JsonMemoryService implements Memory {
     fs.writeFileSync(this.filePath, JSON.stringify(entries, null, 2))
   }
 
+  private readReflections(): Reflection[] {
+    if (!fs.existsSync(this.reflectionPath)) return []
+    return JSON.parse(fs.readFileSync(this.reflectionPath, "utf-8"))
+  }
+
+  private writeReflections(reflections: Reflection[]) {
+    fs.mkdirSync(path.dirname(this.reflectionPath), { recursive: true })
+    fs.writeFileSync(this.reflectionPath, JSON.stringify(reflections, null, 2))
+  }
+
+  // ==================== PUBLIC INTERFACE ====================
+
   async getRecent(limit: number): Promise<Entry[]> {
     const entries = this.read()
     return entries
@@ -39,6 +57,22 @@ export class JsonMemoryService implements Memory {
     const entries = this.read()
     entries.push(entry)
     this.write(entries)
+  }
+
+  async storeReflection(reflection: Reflection): Promise<void> {
+    const reflections = this.readReflections()
+    reflections.push(reflection)
+    this.writeReflections(reflections)
+  }
+
+  async buildContext(): Promise<Context> {
+    const recentEntries = await this.getRecent(5)
+    const reflections = this.readReflections().slice(-5)
+
+    return {
+      recentEntries,
+      reflections
+    } as Context
   }
 
   async searchSemantic(query: string, limit: number): Promise<Entry[]> {
