@@ -20,7 +20,7 @@ export class JournalEngine {
 
     const entry = await this.generator.generate(context)
 
-    // --- Embedding (с проверкой) ---
+    // --- Embedding ---
     const embedding = await this.embedding.embed(entry.content)
 
     if (!embedding || embedding.length === 0) {
