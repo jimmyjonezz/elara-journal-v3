@@ -1,70 +1,63 @@
-// ---------- /services/memory.service.ts ----------
+import fs from "fs"
+import path from "path"
+
 import { Memory } from "../interfaces/memory"
 import { Entry } from "../domain/entry"
-import { Reflection } from "../domain/reflection"
-import { Context } from "../domain/context"
 import { cosineSimilarity } from "./vector.utils"
-import * as fs from "fs"
+import { EmbeddingService } from "../interfaces/embedding"
 
 export class JsonMemoryService implements Memory {
-  private file = "./data/entries.json"
+  private filePath = path.resolve("data/entries.json")
+
+  constructor(private embedding: EmbeddingService) {}
 
   private read(): Entry[] {
-  if (!fs.existsSync(this.file)) return []
+    if (!fs.existsSync(this.filePath)) return []
 
-  const raw = JSON.parse(fs.readFileSync(this.file, "utf-8"))
+    const raw = JSON.parse(fs.readFileSync(this.filePath, "utf-8"))
 
-  return raw.map((e: any) => ({
-    ...e,
-    createdAt: new Date(e.createdAt),
-    embedding: e.embedding || []
-  }))
+    return raw.map((e: any) => ({
+      ...e,
+      createdAt: new Date(e.createdAt),
+      embedding: e.embedding || []
+    }))
   }
 
   private write(entries: Entry[]) {
-    fs.writeFileSync(this.file, JSON.stringify(entries, null, 2))
+    fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
+    fs.writeFileSync(this.filePath, JSON.stringify(entries, null, 2))
   }
 
   async getRecent(limit: number): Promise<Entry[]> {
     const entries = this.read()
-    return entries.slice(-limit)
+    return entries
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit)
   }
 
-  async searchSemantic(query: string, limit: number): Promise<Entry[]> {
-  const entries = this.read()
-
-  if (!entries.length) return []
-
-  const queryEmbedding = await this.embedding.embed(query)
-
-  const scored = entries
-    .filter(e => e.embedding && e.embedding.length)
-    .map(e => ({
-      entry: e,
-      score: cosineSimilarity(queryEmbedding, e.embedding)
-    }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(e => e.entry)
-
-  return scored
-  }
-
-  async storeEntry(entry: Entry): Promise<void> {
+  async store(entry: Entry): Promise<void> {
     const entries = this.read()
     entries.push(entry)
     this.write(entries)
   }
 
-  async storeReflection(reflection: Reflection): Promise<void> {
-    // можно позже вынести отдельно
-  }
+  async searchSemantic(query: string, limit: number): Promise<Entry[]> {
+    const entries = this.read()
 
-  async buildContext(): Promise<Context> {
-    return {
-      recentEntries: await this.getRecent(5),
-      semanticMatches: [],
-      workingMemory: []
-    }
+    if (!entries.length) return []
+
+    const queryEmbedding = await this.embedding.embed(query)
+
+    const scored = entries
+      .filter(e => e.embedding && e.embedding.length)
+      .map(e => ({
+        entry: e,
+        score: cosineSimilarity(queryEmbedding, e.embedding)
+      }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit)
+      .map(e => e.entry)
+
+    return scored
   }
 }
