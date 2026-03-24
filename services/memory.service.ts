@@ -1,22 +1,42 @@
 // ---------- /services/memory.service.ts ----------
-export class SQLiteMemoryService {
-  constructor(private repo: SQLiteEntryRepository) {}
+import { Memory } from "../interfaces/memory"
+import { Entry } from "../domain/entry"
+import { Reflection } from "../domain/reflection"
+import { Context } from "../domain/context"
+import * as fs from "fs"
 
-  async getRecent(limit: number) {
-    return this.repo.getRecent(limit)
+export class JsonMemoryService implements Memory {
+  private file = "./data/entries.json"
+
+  private read(): Entry[] {
+    if (!fs.existsSync(this.file)) return []
+    return JSON.parse(fs.readFileSync(this.file, "utf-8"))
   }
 
-  async searchSemantic() {
+  private write(entries: Entry[]) {
+    fs.writeFileSync(this.file, JSON.stringify(entries, null, 2))
+  }
+
+  async getRecent(limit: number): Promise<Entry[]> {
+    const entries = this.read()
+    return entries.slice(-limit)
+  }
+
+  async searchSemantic(): Promise<Entry[]> {
     return []
   }
 
-  async storeEntry(entry) {
-    await this.repo.save(entry)
+  async storeEntry(entry: Entry): Promise<void> {
+    const entries = this.read()
+    entries.push(entry)
+    this.write(entries)
   }
 
-  async storeReflection() {}
+  async storeReflection(reflection: Reflection): Promise<void> {
+    // можно позже вынести отдельно
+  }
 
-  async buildContext() {
+  async buildContext(): Promise<Context> {
     return {
       recentEntries: await this.getRecent(5),
       semanticMatches: [],
