@@ -4,3 +4,7 @@ export type Prompt = {
   version: string
   template: string
 }
+
+export interface PromptManager {
+  getPrompt(id: string): Promise<Prompt>
+}
