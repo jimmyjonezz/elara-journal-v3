@@ -5,6 +5,7 @@ import { Context } from "../domain/context"
 import { Reflection } from "../domain/reflection"
 import { OpenAIClient } from "../infra/llm/openai.client"
 import { FilePromptManager } from "./prompt.service"
+import { v4 as uuid } from "uuid"
 
 export class AIReflector implements Reflector {
   constructor(
@@ -20,7 +21,7 @@ export class AIReflector implements Reflector {
     const analysis = await this.llm.generate(input)
 
     return {
-      id: crypto.randomUUID(),
+      id: uuid(),
       entryId: entry.id,
       analysis,
       selfScore: 0.5,
