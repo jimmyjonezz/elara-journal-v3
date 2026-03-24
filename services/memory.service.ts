@@ -67,12 +67,12 @@ export class JsonMemoryService implements Memory {
 
   async buildContext(): Promise<Context> {
     const recentEntries = await this.getRecent(5)
-    const reflections = this.readReflections().slice(-5)
 
     return {
       recentEntries,
-      reflections
-    } as Context
+      semanticMatches: [],
+      workingMemory: []
+    }
   }
 
   async searchSemantic(query: string, limit: number): Promise<Entry[]> {
