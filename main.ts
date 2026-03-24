@@ -1,7 +1,7 @@
 // ---------- /main.ts ----------
 import { JournalEngine } from "./core/journalEngine"
 
-import { SQLiteMemoryService } from "./services/memory.service"
+import { JsonMemoryService } from "./services/memory.service"
 import { SQLiteEntryRepository } from "./infra/db/entry.repository"
 
 import { AIGenerator } from "./services/generator.service"
@@ -19,7 +19,7 @@ async function main() {
   const prompts = new FilePromptManager()
 
   const repo = new SQLiteEntryRepository()
-  const memory = new SQLiteMemoryService(repo)
+  const memory = new JsonMemoryService()
 
   const generator = new AIGenerator(llm, prompts)
   const reflector = new AIReflector(llm, prompts)
