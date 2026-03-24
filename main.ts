@@ -2,7 +2,7 @@
 import { JournalEngine } from "./core/journalEngine"
 
 import { JsonMemoryService } from "./services/memory.service"
-import { SQLiteEntryRepository } from "./infra/db/entry.repository"
+//import { SQLiteEntryRepository } from "./infra/db/entry.repository"
 
 import { AIGenerator } from "./services/generator.service"
 import { AIReflector } from "./services/reflector.service"
@@ -18,7 +18,7 @@ async function main() {
   const llm = new OpenAIClient()
   const prompts = new FilePromptManager()
 
-  const repo = new SQLiteEntryRepository()
+  //const repo = new SQLiteEntryRepository()
   const memory = new JsonMemoryService()
 
   const generator = new AIGenerator(llm, prompts)
