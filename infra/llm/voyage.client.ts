@@ -1,3 +1,6 @@
+export class VoyageClient {
+  private apiKey = process.env.VOYAGE_API_KEY!
+
 async embed(text: string): Promise<number[]> {
   const res = await fetch("https://api.voyageai.com/v1/embeddings", {
     method: "POST",
@@ -31,4 +34,5 @@ async embed(text: string): Promise<number[]> {
   }
 
   throw new Error("Voyage embedding failed: empty response")
+}
 }
