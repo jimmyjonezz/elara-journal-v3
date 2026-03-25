@@ -3,29 +3,33 @@
 import { Generator } from "../interfaces/generator"
 import { Context } from "../domain/context"
 import { Entry } from "../domain/entry"
+import { SelfState } from "../domain/self-state"
 import { OllamaClient } from "../infra/llm/ollama.client"
 import { FilePromptManager } from "./prompt.service"
-import { Memory } from "../interfaces/memory"
 
 export class AIGenerator implements Generator {
   constructor(
     private llm: OllamaClient,
-    private prompts: FilePromptManager,
-    private memory: Memory
+    private prompts: FilePromptManager
   ) {}
 
-  async generate(context: Context & { state: any }): Promise<Entry> {
-    const recentEntries = context.recentEntries || []
-    const semanticMatches = context.semanticMatches || []
-    const state = context.state
+  async generate(
+    context: Context & { state: SelfState; reflections: any[] }
+  ): Promise<Entry> {
+    const { recentEntries, semanticMatches, state, reflections } = context
 
-    const reflections = await this.memory.getRecentReflections(5)
+    const issues = reflections.flatMap(r => r?.issues ?? [])
+    const improvements = reflections.flatMap(r => r?.improvements ?? [])
 
-    const issues = reflections.flatMap(r => r.issues || [])
-    const improvements = reflections.flatMap(r => r.improvements || [])
-
-    // --- base prompt из файла ---
     const basePrompt = this.prompts.get("journal")
+
+    const avoidBlock = issues.length
+      ? `Avoid:\n${issues.join("\n")}`
+      : ""
+
+    const improveBlock = improvements.length
+      ? `Improve:\n${improvements.join("\n")}`
+      : ""
 
     const prompt = `
 ${basePrompt}
@@ -40,20 +44,12 @@ Confidence: ${state.confidence}
 Recent entries:
 ${recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n")}
 
-Related memories:
-${semanticMatches.map(e => e.content.slice(0, 200)).join("\n---\n")}
-
 # Constraints
-- Do not repeat structure or phrasing from recent entries
-- If drift is high → change structure significantly
-- Keep the entry concise
+- Do not repeat structure or phrasing
+- High drift → change structure significantly
 
-# Self-Improvement Signals (use lightly)
-Avoid:
-${issues.join("\n")}
-
-Improve:
-${improvements.join("\n")}
+${avoidBlock}
+${improveBlock}
 
 # Task
 Write the next journal entry.
