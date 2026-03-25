@@ -8,7 +8,7 @@ import { ConsolePublisher } from "./services/publisher.service"
 import { OllamaClient } from "./infra/llm/ollama.client"
 import { VoyageEmbedding } from "./infra/embedding/voyage.service"
 import { FilePromptManager } from "./services/prompt.service"
-import { JournalEngine } from "./core/JournalEngine"
+import { JournalEngine } from "./core/journalEngine"
 
 async function main() {
   const embedding = new VoyageEmbedding()
