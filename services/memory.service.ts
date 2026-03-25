@@ -18,40 +18,38 @@ export class JsonMemoryService implements Memory {
 
   constructor(private embedding: EmbeddingService) {}
 
-  // ==================== PRIVATE HELPERS ====================
-
   private read(): Entry[] {
     if (!fs.existsSync(this.filePath)) return []
 
-    const raw = JSON.parse(fs.readFileSync(this.filePath, "utf-8"))
-
-    return raw.map((e: any) => ({
-      ...e,
-      createdAt: new Date(e.createdAt),
-      embedding: e.embedding || []
-    }))
+    try {
+      const raw = JSON.parse(fs.readFileSync(this.filePath, "utf-8"))
+      return raw.map((e: any) => ({
+        ...e,
+        createdAt: new Date(e.createdAt),
+        embedding: e.embedding || []
+      }))
+    } catch {
+      return []
+    }
   }
 
   private write(entries: Entry[]) {
     fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
 
-    const formatted = JSON.stringify(
-      entries,
-      (key, value) => {
-        if (key === "embedding" && Array.isArray(value)) {
-          return `[${value.join(",")}]`
-        }
-        return value
-      },
-      2
-    ).replace(/"\[(.*?)\]"/g, "[$1]")
-
-    fs.writeFileSync(this.filePath, formatted)
+    fs.writeFileSync(
+      this.filePath,
+      JSON.stringify(entries, null, 2)
+    )
   }
 
   private readReflections(): Reflection[] {
     if (!fs.existsSync(this.reflectionPath)) return []
-    return JSON.parse(fs.readFileSync(this.reflectionPath, "utf-8"))
+
+    try {
+      return JSON.parse(fs.readFileSync(this.reflectionPath, "utf-8"))
+    } catch {
+      return []
+    }
   }
 
   private writeReflections(reflections: Reflection[]) {
@@ -62,8 +60,6 @@ export class JsonMemoryService implements Memory {
     )
   }
 
-  // ==================== SELF STATE ====================
-
   async getSelfState(): Promise<SelfState> {
     if (!fs.existsSync(this.selfStatePath)) {
       const initial: SelfState = {
@@ -72,16 +68,29 @@ export class JsonMemoryService implements Memory {
         drift: 0.3,
         confidence: 0.5
       }
-
       await this.saveSelfState(initial)
       return initial
     }
 
-    const raw = JSON.parse(
-      fs.readFileSync(this.selfStatePath, "utf-8")
-    )
+    try {
+      const raw = JSON.parse(
+        fs.readFileSync(this.selfStatePath, "utf-8")
+      )
 
-    return raw
+      return {
+        mood: raw.mood || "calm",
+        themes: raw.themes || [],
+        drift: raw.drift ?? 0.3,
+        confidence: raw.confidence ?? 0.5
+      }
+    } catch {
+      return {
+        mood: "calm",
+        themes: [],
+        drift: 0.3,
+        confidence: 0.5
+      }
+    }
   }
 
   async saveSelfState(state: SelfState): Promise<void> {
@@ -93,19 +102,14 @@ export class JsonMemoryService implements Memory {
     )
   }
 
-  // ==================== PUBLIC ====================
-
   async getRecent(limit: number): Promise<Entry[]> {
-    const entries = this.read()
-
-    return entries
+    return this.read()
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit)
   }
 
   async getRecentReflections(limit: number): Promise<Reflection[]> {
-    const data = this.readReflections()
-    return data.slice(-limit)
+    return this.readReflections().slice(-limit)
   }
 
   async storeEntry(entry: Entry): Promise<void> {
@@ -123,9 +127,17 @@ export class JsonMemoryService implements Memory {
   async buildContext(): Promise<Context> {
     const recentEntries = await this.getRecent(5)
 
+    const semanticMatches =
+      recentEntries.length > 0
+        ? await this.searchSemantic(
+            recentEntries[0].content,
+            3
+          )
+        : []
+
     return {
       recentEntries,
-      semanticMatches: [],
+      semanticMatches,
       workingMemory: []
     }
   }
@@ -136,8 +148,8 @@ export class JsonMemoryService implements Memory {
 
     const queryEmbedding = await this.embedding.embed(query)
 
-    const scored = entries
-      .filter(e => e.embedding && e.embedding.length)
+    return entries
+      .filter(e => e.embedding?.length)
       .map(e => ({
         entry: e,
         score: cosineSimilarity(queryEmbedding, e.embedding)
@@ -145,7 +157,5 @@ export class JsonMemoryService implements Memory {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(e => e.entry)
-
-    return scored
   }
 }
