@@ -7,30 +7,52 @@ export function updateState(
   prev: SelfState,
   reflection: Reflection
 ): SelfState {
-  const drift =
-    reflection.issues?.includes("repetition")
-      ? Math.min(1, prev.drift + 0.2)
-      : prev.drift * 0.95
 
-  const confidence =
-    reflection.score && reflection.score > 0.8
-      ? Math.min(1, prev.confidence + 0.1)
-      : Math.max(0, prev.confidence - 0.05)
+  // --- Drift ---
+  const repetitionSignals = ["repetition", "similar", "redundant"]
 
-  const themes = [
-    ...new Set([...(prev.themes || []), ...(reflection.themes || [])])
-  ].slice(0, 5)
+  const hasRepetition = reflection.issues?.some(issue =>
+    repetitionSignals.some(signal => issue.toLowerCase().includes(signal))
+  )
 
-  const moods: SelfState["mood"][] = [
-    "calm", 
-    "curious", 
-    "reflective", 
-    "gentle", 
-    "attentive"
-  ]
+  const drift = hasRepetition
+    ? Math.min(1, prev.drift + 0.15)
+    : prev.drift * 0.97
+
+  // --- Confidence (плавная реакция на score) ---
+  const score = reflection.score ?? 0.5
+
+  const confidenceDelta = (score - 0.5) * 0.2
+  const confidence = Math.max(
+    0,
+    Math.min(1, prev.confidence + confidenceDelta)
+  )
+
+  // --- Themes (нормализация) ---
+  const normalize = (t: string) => t.toLowerCase().trim()
+
+  const themes = Array.from(
+    new Set([
+      ...(prev.themes || []).map(normalize),
+      ...(reflection.themes || []).map(normalize)
+    ])
+  ).slice(0, 5)
+
+  // --- Mood (зависит от состояния) ---
+  let mood: SelfState["mood"]
+
+  if (drift > 0.7) {
+    mood = "restless"
+  } else if (confidence > 0.75) {
+    mood = "confident"
+  } else if (score < 0.4) {
+    mood = "uncertain"
+  } else {
+    mood = "reflective"
+  }
 
   return {
-    mood: moods[Math.floor(Math.random() * moods.length)],
+    mood,
     themes,
     drift,
     confidence
