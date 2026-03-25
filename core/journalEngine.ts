@@ -16,9 +16,15 @@ export class JournalEngine {
   ) {}
 
   async runCycle(): Promise<void> {
+    // --- Context ---
     const context = await this.memory.buildContext()
 
+    // --- Generation ---
     const entry = await this.generator.generate(context)
+
+    if (!entry) {
+      throw new Error("Generation failed: empty entry")
+    }
 
     // --- Embedding ---
     const embedding = await this.embedding.embed(entry.content)
@@ -29,17 +35,21 @@ export class JournalEngine {
 
     entry.embedding = embedding
 
-    // --- Reflection ---
+    // --- Reflection (ВСЕГДА, если entry существует) ---
     const reflection = await this.reflector.reflect(entry, context)
+
+    // Сохраняем reflection независимо от качества entry
+    await this.memory.storeReflection(reflection)
 
     // --- Evaluation ---
     const evaluation = await this.evaluator.evaluate(entry)
 
-    if (!evaluation.valid) return
+    if (!evaluation.valid) {
+      return // entry не сохраняем, но reflection уже сохранён
+    }
 
     // --- Persistence ---
     await this.memory.storeEntry(entry)
-    await this.memory.storeReflection(reflection)
 
     // --- Output ---
     await this.publisher.publish(entry, "console")
