@@ -31,7 +31,7 @@ export class JsonMemoryService implements Memory {
 
   private write(entries: Entry[]) {
     fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
-    fs.writeFileSync(this.filePath, JSON.stringify(entries, null, 2))
+    fs.writeFileSync(path, JSON.stringify(entries))
   }
 
   private readReflections(): Reflection[] {
