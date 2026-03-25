@@ -6,7 +6,7 @@ import { ReflectionService } from "./services/reflector.service"
 import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 import { OllamaClient } from "./infra/llm/ollama.client"
-import { VoyageEmbedding } from "./infra/embedding/voyage.service"
+import { VoyageEmbedding } from "./infra/llm/voyage.service"
 import { FilePromptManager } from "./services/prompt.service"
 import { JournalEngine } from "./core/journalEngine"
 
