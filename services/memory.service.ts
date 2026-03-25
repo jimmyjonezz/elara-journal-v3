@@ -1,17 +1,20 @@
+// services/memory.service.ts
+
 import * as fs from "fs"
 import * as path from "path"
 
-// Импорт интерфейсов и типов
 import { Memory } from "../interfaces/memory"
 import { Entry } from "../domain/entry"
 import { Reflection } from "../domain/reflection"
 import { Context } from "../domain/context"
 import { EmbeddingService } from "../interfaces/embedding"
+import { SelfState } from "../domain/self-state"
 import { cosineSimilarity } from "./vector.utils"
 
 export class JsonMemoryService implements Memory {
   private filePath = path.resolve("data/entries.json")
   private reflectionPath = path.resolve("data/reflections.json")
+  private selfStatePath = path.resolve("data/self-state.json")
 
   constructor(private embedding: EmbeddingService) {}
 
@@ -30,23 +33,20 @@ export class JsonMemoryService implements Memory {
   }
 
   private write(entries: Entry[]) {
-  fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
+    fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
 
-  let json = JSON.stringify(entries, null, 2)
+    const formatted = JSON.stringify(
+      entries,
+      (key, value) => {
+        if (key === "embedding" && Array.isArray(value)) {
+          return `[${value.join(",")}]`
+        }
+        return value
+      },
+      2
+    ).replace(/"\[(.*?)\]"/g, "[$1]")
 
-  // Сжимаем embedding в одну строку
-  json = json.replace(
-    /"embedding": \[\s+([^\]]+?)\s+\]/g,
-    (_, inner) => {
-      const compact = inner
-        .split(",")
-        .map(s => s.trim())
-        .join(", ")
-      return `"embedding": [${compact}]`
-    }
-  )
-
-  fs.writeFileSync(this.filePath, json)
+    fs.writeFileSync(this.filePath, formatted)
   }
 
   private readReflections(): Reflection[] {
@@ -56,21 +56,56 @@ export class JsonMemoryService implements Memory {
 
   private writeReflections(reflections: Reflection[]) {
     fs.mkdirSync(path.dirname(this.reflectionPath), { recursive: true })
-    fs.writeFileSync(this.reflectionPath, JSON.stringify(reflections, null, 2))
+    fs.writeFileSync(
+      this.reflectionPath,
+      JSON.stringify(reflections, null, 2)
+    )
   }
 
-  // ==================== PUBLIC INTERFACE ====================
+  // ==================== SELF STATE ====================
+
+  async getSelfState(): Promise<SelfState> {
+    if (!fs.existsSync(this.selfStatePath)) {
+      const initial: SelfState = {
+        mood: "calm",
+        themes: [],
+        drift: 0.3,
+        confidence: 0.5
+      }
+
+      await this.saveSelfState(initial)
+      return initial
+    }
+
+    const raw = JSON.parse(
+      fs.readFileSync(this.selfStatePath, "utf-8")
+    )
+
+    return raw
+  }
+
+  async saveSelfState(state: SelfState): Promise<void> {
+    fs.mkdirSync(path.dirname(this.selfStatePath), { recursive: true })
+
+    fs.writeFileSync(
+      this.selfStatePath,
+      JSON.stringify(state, null, 2)
+    )
+  }
+
+  // ==================== PUBLIC ====================
 
   async getRecent(limit: number): Promise<Entry[]> {
     const entries = this.read()
+
     return entries
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit)
   }
 
-  async getRecentReflections(limit: number): Promise<any[]> {
-  const data = await this.readReflections()
-  return data.slice(-limit)
+  async getRecentReflections(limit: number): Promise<Reflection[]> {
+    const data = this.readReflections()
+    return data.slice(-limit)
   }
 
   async storeEntry(entry: Entry): Promise<void> {
@@ -97,7 +132,6 @@ export class JsonMemoryService implements Memory {
 
   async searchSemantic(query: string, limit: number): Promise<Entry[]> {
     const entries = this.read()
-
     if (!entries.length) return []
 
     const queryEmbedding = await this.embedding.embed(query)
