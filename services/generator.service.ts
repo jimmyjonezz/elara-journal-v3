@@ -36,29 +36,23 @@ export class AIGenerator implements Generator {
     const modes = ["minimal", "structured", "narrative", "analytical"]
     const mode = modes[Math.floor(Math.random() * modes.length)]
 
-    const prompt = `
-Mode: ${mode}
+    // generator.service.ts
+const state = await this.memory.getSelfState()
 
-Context:
-Recent entries (do NOT repeat their structure or patterns):
-${recentEntries.map((e: any) => e.content.slice(0, 200)).join("\n---\n")}
+const prompt = `
+${basePrompt}
 
-Constraints:
-- Do not reuse the same structure as recent entries
-- Avoid repeating similar scenarios
-- Keep the entry distinct
+# Internal State
+Mood: ${state.mood}
+Themes: ${state.themes.join(", ")}
+Drift: ${state.drift}
+Confidence: ${state.confidence}
 
-Self-improvement signals (use lightly, do not overfit):
-
-Avoid:
-${issues.join("\n")}
-
-Improve:
-${improvements.join("\n")}
-
-Write a new, distinct journal entry.
+# Instructions
+- Adjust tone based on mood
+- If drift is high → change structure significantly
+- If confidence is low → experiment more
 `
-
     const content = await this.llm.generate(prompt)
 
     return {
