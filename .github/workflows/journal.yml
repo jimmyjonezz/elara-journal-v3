@@ -27,7 +27,7 @@ jobs:
       - name: Run journal
         run: npx ts-node main.ts
         env:
-          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
 
       - name: Commit changes
         run: |
