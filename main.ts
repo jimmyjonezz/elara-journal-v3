@@ -3,7 +3,7 @@
 import { JsonMemoryService } from "./services/memory.service"
 import { AIGenerator } from "./services/generator.service"
 import { ReflectionService } from "./services/reflector.service"
-import { EvaluationService } from "./services/evaluator.service"
+import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 import { OllamaClient } from "./infra/llm/ollama.client"
 import { VoyageEmbedding } from "./infra/embedding/voyage.service"
