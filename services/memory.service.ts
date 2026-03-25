@@ -30,8 +30,23 @@ export class JsonMemoryService implements Memory {
   }
 
   private write(entries: Entry[]) {
-    fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
-    fs.writeFileSync(this.filePath, JSON.stringify(entries))
+  fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
+
+  let json = JSON.stringify(entries, null, 2)
+
+  // Сжимаем embedding в одну строку
+  json = json.replace(
+    /"embedding": \[\s+([^\]]+?)\s+\]/g,
+    (_, inner) => {
+      const compact = inner
+        .split(",")
+        .map(s => s.trim())
+        .join(", ")
+      return `"embedding": [${compact}]`
+    }
+  )
+
+  fs.writeFileSync(this.filePath, json)
   }
 
   private readReflections(): Reflection[] {
