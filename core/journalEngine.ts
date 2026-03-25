@@ -19,44 +19,37 @@ export class JournalEngine {
   ) {}
 
   async runCycle(): Promise<void> {
-    // --- Context ---
     const context = await this.memory.buildContext()
 
-    // --- Self State ---
     const state = await this.memory.getSelfState()
+    const reflections = await this.memory.getRecentReflections(5)
 
-    // --- Generation ---
     const entry = await this.generator.generate({
       ...context,
-      state
+      state,
+      reflections
     })
 
-    // --- Embedding ---
     const embedding = await this.embedding.embed(entry.content)
 
-    if (!embedding || embedding.length === 0) {
-      throw new Error("Embedding failed: empty vector")
+    if (!embedding?.length) {
+      throw new Error("Embedding failed")
     }
 
     entry.embedding = embedding
 
-    // --- Reflection ---
     const reflection = await this.reflector.reflect(entry, context)
 
-    // --- Evaluation ---
     const evaluation = await this.evaluator.evaluate(entry)
 
     if (!evaluation.valid) return
 
-    // --- State Update ---
     const newState = updateState(state, reflection)
 
-    // --- Persistence ---
     await this.memory.storeEntry(entry)
     await this.memory.storeReflection(reflection)
     await this.memory.saveSelfState(newState)
 
-    // --- Output ---
     await this.publisher.publish(entry, "console")
   }
 }
