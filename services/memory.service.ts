@@ -31,7 +31,7 @@ export class JsonMemoryService implements Memory {
 
   private write(entries: Entry[]) {
     fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
-    fs.writeFileSync(path, JSON.stringify(entries))
+    fs.writeFileSync(this.filePath, JSON.stringify(entries))
   }
 
   private readReflections(): Reflection[] {
@@ -54,7 +54,7 @@ export class JsonMemoryService implements Memory {
   }
 
   async getRecentReflections(limit: number): Promise<any[]> {
-  const data = await this.loadReflections()
+  const data = await this.readReflections()
   return data.slice(-limit)
   }
 
