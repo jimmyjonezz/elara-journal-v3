@@ -1,8 +1,5 @@
-// ---------- /interfaces/reflector.ts ----------
-import { Entry } from "../domain/entry"
-import { Context } from "../domain/context"
-import { Reflection } from "../domain/reflection"
+import { Reflection } from "./reflection"
 
 export interface Reflector {
-  reflect(entry: Entry, context: Context): Promise<Reflection>
+  reflect(entry: any, context: any): Promise<Reflection>
 }
