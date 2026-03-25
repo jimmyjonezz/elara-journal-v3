@@ -1,4 +1,5 @@
 // interfaces/memory.ts
+
 import { Entry } from "../domain/entry"
 import { Reflection } from "../domain/reflection"
 import { Context } from "../domain/context"
@@ -15,7 +16,6 @@ export interface Memory {
   storeEntry(entry: Entry): Promise<void>
   storeReflection(reflection: Reflection): Promise<void>
 
-  // --- Self State ---
   getSelfState(): Promise<SelfState>
   saveSelfState(state: SelfState): Promise<void>
 }
