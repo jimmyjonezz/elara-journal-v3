@@ -13,34 +13,41 @@ export class AIGenerator implements Generator {
     private memory: Memory
   ) {}
 
-  async generate(context: Context): Promise<Entry> {
-    const prompt = await this.prompts.getPrompt("generation")
+  async generate(context: any): Promise<any> {
+  const recentEntries = context.recentEntries || []
+  const semanticMatches = context.semanticMatches || []
 
-    const recent = context.recentEntries || []
+  // --- НОВОЕ ---
+  const reflections = await this.memory.getRecentReflections(5)
 
-    // semantic search (используем последние записи как запрос)
-    const semantic = await this.memory.searchSemantic(
-      recent.map(e => e.content).join("\n"),
-      3
-    )
+  const issues = reflections.flatMap(r => r.issues || [])
+  const improvements = reflections.flatMap(r => r.improvements || [])
 
-    const input = `
-${prompt.template}
+  const prompt = `
+You are writing a journal entry.
 
-Recent:
-${recent.map(e => e.content).join("\n")}
+Context:
+- Recent entries: ${recentEntries.map((e: any) => e.content).join("\n")}
+- Related memories: ${semanticMatches.map((e: any) => e.content).join("\n")}
 
-Relevant past:
-${semantic.map(e => e.content).join("\n")}
+Self-improvement constraints:
+
+Avoid repeating these issues:
+${issues.join("\n")}
+
+Improve on these aspects:
+${improvements.join("\n")}
+
+Write a new journal entry.
 `
 
-    const content = await this.llm.generate(input)
+  const content = await this.llm.generate(prompt)
 
-    return {
-      id: uuid(),
-      content,
-      createdAt: new Date(),
-      embedding: []
-    }
+  return {
+    id: crypto.randomUUID(),
+    content,
+    createdAt: new Date(),
+    embedding: []
   }
+}
 }
