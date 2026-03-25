@@ -37,10 +37,6 @@ export class AIGenerator implements Generator {
     const mode = modes[Math.floor(Math.random() * modes.length)]
 
     const prompt = `
-You are writing a journal entry.
-
-Write concisely. Avoid long narratives.
-
 Mode: ${mode}
 
 Context:
