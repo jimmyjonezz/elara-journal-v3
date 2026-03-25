@@ -19,4 +19,8 @@ export interface Memory {
   buildContext(): Promise<Context>
 
   getRecentReflections(limit: number): Promise<any[]>
+
+  // --- Self State ---
+  getSelfState(): Promise<SelfState>
+  saveSelfState(state: SelfState): Promise<void>
 }
