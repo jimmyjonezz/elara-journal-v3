@@ -1,19 +1,20 @@
 import { Reflector } from "../interfaces/reflector"
-import { Reflection } from "../interfaces/reflection"
+import { Reflection } from "../domain/reflection"
+import { randomUUID } from "crypto"
 
 export class AIReflector implements Reflector {
   constructor(private llm: any, private prompts: any) {}
 
   async reflect(entry: any, context: any): Promise<Reflection> {
     const prompt = `
-Analyze the following journal entry.
+Analyze the journal entry.
 
 Return JSON:
 {
-  "score": 0-10,
-  "issues": [],
-  "improvements": [],
-  "themes": []
+  "score": number (0-10),
+  "issues": string[],
+  "improvements": string[],
+  "themes": string[]
 }
 
 Entry:
@@ -26,19 +27,26 @@ ${entry.content}
       const parsed = JSON.parse(raw)
 
       return {
+        id: randomUUID(),
         entryId: entry.id,
-        score: parsed.score ?? 5,
+        analysis: raw,
+        selfScore: parsed.score ?? 5,
         issues: parsed.issues ?? [],
         improvements: parsed.improvements ?? [],
-        themes: parsed.themes ?? []
+        themes: parsed.themes ?? [],
+        createdAt: new Date()
       }
+
     } catch {
       return {
+        id: randomUUID(),
         entryId: entry.id,
-        score: 5,
+        analysis: raw,
+        selfScore: 5,
         issues: [],
         improvements: [],
-        themes: []
+        themes: [],
+        createdAt: new Date()
       }
     }
   }
