@@ -17,4 +17,6 @@ export interface Memory {
 
   // построение контекста для генерации
   buildContext(): Promise<Context>
+
+  getRecentReflections(limit: number): Promise<any[]>
 }
