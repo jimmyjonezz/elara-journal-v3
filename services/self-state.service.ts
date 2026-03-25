@@ -42,11 +42,11 @@ export function updateState(
   let mood: SelfState["mood"]
 
   if (drift > 0.7) {
-    mood = "restless"
+    mood = "calm"
   } else if (confidence > 0.75) {
-    mood = "confident"
+    mood = "curious"
   } else if (score < 0.4) {
-    mood = "uncertain"
+    mood = "gentle"
   } else {
     mood = "reflective"
   }
