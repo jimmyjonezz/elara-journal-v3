@@ -1,9 +1,12 @@
+// core/JournalEngine.ts
+
 import { Memory } from "../interfaces/memory"
 import { Generator } from "../interfaces/generator"
 import { Reflector } from "../interfaces/reflector"
 import { Evaluator } from "../interfaces/evaluator"
 import { Publisher } from "../interfaces/publisher"
 import { EmbeddingService } from "../interfaces/embedding"
+import { updateState } from "../services/self-state.service"
 
 export class JournalEngine {
   constructor(
@@ -19,12 +22,14 @@ export class JournalEngine {
     // --- Context ---
     const context = await this.memory.buildContext()
 
-    // --- Generation ---
-    const entry = await this.generator.generate(context)
+    // --- Self State ---
+    const state = await this.memory.getSelfState()
 
-    if (!entry) {
-      throw new Error("Generation failed: empty entry")
-    }
+    // --- Generation ---
+    const entry = await this.generator.generate({
+      ...context,
+      state
+    })
 
     // --- Embedding ---
     const embedding = await this.embedding.embed(entry.content)
@@ -35,21 +40,21 @@ export class JournalEngine {
 
     entry.embedding = embedding
 
-    // --- Reflection (ВСЕГДА, если entry существует) ---
+    // --- Reflection ---
     const reflection = await this.reflector.reflect(entry, context)
-
-    // Сохраняем reflection независимо от качества entry
-    await this.memory.storeReflection(reflection)
 
     // --- Evaluation ---
     const evaluation = await this.evaluator.evaluate(entry)
 
-    if (!evaluation.valid) {
-      return // entry не сохраняем, но reflection уже сохранён
-    }
+    if (!evaluation.valid) return
+
+    // --- State Update ---
+    const newState = updateState(state, reflection)
 
     // --- Persistence ---
     await this.memory.storeEntry(entry)
+    await this.memory.storeReflection(reflection)
+    await this.memory.saveSelfState(newState)
 
     // --- Output ---
     await this.publisher.publish(entry, "console")
