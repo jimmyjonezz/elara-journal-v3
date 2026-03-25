@@ -22,10 +22,11 @@ export function updateState(
   ].slice(0, 5)
 
   const moods: SelfState["mood"][] = [
-    "calm",
-    "curious",
-    "analytical",
-    "drifting"
+    "calm", 
+    "curious", 
+    "reflective", 
+    "gentle", 
+    "attentive"
   ]
 
   return {
