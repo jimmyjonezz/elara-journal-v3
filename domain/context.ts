@@ -1,8 +1,18 @@
-// ---------- /domain/context.ts ----------
+// domain/context.ts
 import { Entry } from "./entry"
+import { Reflection } from "./reflection"
 
-export type Context = {
+export interface SelfState {
+  mood: string
+  themes: string[]
+  drift: number
+  confidence: number
+}
+
+export interface Context {
   recentEntries: Entry[]
   semanticMatches: Entry[]
-  workingMemory: string[]
+  reflections: Reflection[]
+  workingMemory: any[]
+  state: SelfState
 }
