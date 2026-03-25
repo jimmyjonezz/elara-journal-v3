@@ -1,5 +1,6 @@
 export interface Reflection {
   id: string
+  score: number
   entryId: string
   analysis: string
   selfScore: number
