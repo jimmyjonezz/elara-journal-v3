@@ -6,15 +6,16 @@ import { AIReflector } from "./services/reflector.service"
 import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 
-import { OllamaClient } from "./infra/llm/ollama.client"
-import { OllamaEmbeddingService } from "./services/embedding.service"
+import { VoyageEmbeddingService } from "./services/embedding.service"
+import { VoyageClient } from "./infra/llm/voyage.client"
 import { FilePromptManager } from "./services/prompt.service"
 
 async function main() {
-  const llm = new OllamaClient()
   const prompts = new FilePromptManager()
 
-  const embedding = new OllamaEmbeddingService(llm)
+  const voyage = new VoyageClient()
+  const embedding = new VoyageEmbeddingService(voyage)
+    
   const memory = new JsonMemoryService(embedding)
 
   const generator = new AIGenerator(llm, prompts, memory)
