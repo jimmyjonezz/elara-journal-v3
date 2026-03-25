@@ -29,7 +29,7 @@ async function main() {
   const memory = new JsonMemoryService(embedding)
 
   // --- Core services ---
-  const generator = new AIGenerator(llm, prompts, memory)
+  const generator = new AIGenerator(llm, prompts)
   const reflector = new AIReflector(llm, prompts)
   const evaluator = new SimpleEvaluator()
   const publisher = new ConsolePublisher()
