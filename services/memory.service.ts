@@ -53,6 +53,11 @@ export class JsonMemoryService implements Memory {
       .slice(0, limit)
   }
 
+  async getRecentReflections(limit: number): Promise<any[]> {
+  const data = await this.loadReflections()
+  return data.slice(-limit)
+  }
+
   async storeEntry(entry: Entry): Promise<void> {
     const entries = this.read()
     entries.push(entry)
