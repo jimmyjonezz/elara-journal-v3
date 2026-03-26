@@ -21,7 +21,9 @@ export class AIGenerator implements Generator {
     const issues = reflections.flatMap(r => r?.issues ?? [])
     const improvements = reflections.flatMap(r => r?.improvements ?? [])
 
-    const basePrompt = this.prompts.get("journal")
+    // ✅ исправлено здесь
+    const promptObj = await this.prompts.getPrompt("journal")
+    const basePrompt = promptObj.template
 
     const avoidBlock = issues.length
       ? `Avoid:\n${issues.join("\n")}`
