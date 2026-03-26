@@ -33,7 +33,6 @@ ${entry.content}
         entryId: entry.id,
         analysis: raw,
 
-        // ✅ ключевой фикс
         score: parsed.score ?? 5,
 
         issues: parsed.issues ?? [],
@@ -48,7 +47,6 @@ ${entry.content}
         entryId: entry.id,
         analysis: raw,
 
-        // ✅ обязательно
         score: 5,
 
         issues: [],
