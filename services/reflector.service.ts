@@ -1,3 +1,5 @@
+// services/reflector.service.ts
+
 import { Reflector } from "../interfaces/reflector"
 import { Reflection } from "../domain/reflection"
 import { randomUUID } from "crypto"
@@ -30,7 +32,10 @@ ${entry.content}
         id: randomUUID(),
         entryId: entry.id,
         analysis: raw,
-        selfScore: parsed.score ?? 5,
+
+        // ✅ ключевой фикс
+        score: parsed.score ?? 5,
+
         issues: parsed.issues ?? [],
         improvements: parsed.improvements ?? [],
         themes: parsed.themes ?? [],
@@ -42,7 +47,10 @@ ${entry.content}
         id: randomUUID(),
         entryId: entry.id,
         analysis: raw,
-        selfScore: 5,
+
+        // ✅ обязательно
+        score: 5,
+
         issues: [],
         improvements: [],
         themes: [],
