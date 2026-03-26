@@ -157,21 +157,27 @@ export class JsonMemoryService implements Memory {
       .map(e => e.entry)
   }
 
-  async buildContext(): Promise<Context> {
-    const recentEntries = await this.getRecent(5)
+  // services/memory.service.ts
 
-    const semanticMatches =
-      recentEntries.length > 0
-        ? await this.searchSemantic(
-            recentEntries[0].content,
-            3
-          )
-        : []
+async buildContext(): Promise<Context> {
+  const recentEntries = await this.getRecent(5)
+  const reflections = await this.getRecentReflections(3)
+  const state = await this.getSelfState()
 
-    return {
-      recentEntries,
-      semanticMatches,
-      workingMemory: []
-    }
+  const semanticMatches =
+    recentEntries.length > 0
+      ? await this.searchSemantic(
+          recentEntries[0].content,
+          3
+        )
+      : []
+
+  return {
+    recentEntries,
+    semanticMatches,
+    reflections,
+    state,
+    workingMemory: []
   }
+}
 }
