@@ -1,9 +1,12 @@
+// domain/reflection.ts
+
 export interface Reflection {
   id: string
-  score: number
   entryId: string
   analysis: string
-  selfScore: number
+
+  score: number
+
   issues: string[]
   improvements: string[]
   themes: string[]
