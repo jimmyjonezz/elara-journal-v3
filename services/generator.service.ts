@@ -22,7 +22,7 @@ export class AIGenerator implements Generator {
     const improvements = reflections.flatMap(r => r?.improvements ?? [])
 
     // ✅ исправлено здесь
-    const promptObj = await this.prompts.getPrompt("journal")
+    const promptObj = await this.prompts.getPrompt("generation")
     const basePrompt = promptObj.template
 
     const avoidBlock = issues.length
