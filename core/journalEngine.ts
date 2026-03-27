@@ -42,7 +42,7 @@ export class JournalEngine {
     //entry.embedding = embedding
 
     const reflection = await this.reflector.reflect(entry, context)
-    console.log("REFLECTION OBJECT:", reflection)
+    //console.log("REFLECTION OBJECT:", reflection)
     const evaluation = await this.evaluator.evaluate(entry)
 
     if (!evaluation.valid) return
