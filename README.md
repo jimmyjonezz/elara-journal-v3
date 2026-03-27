@@ -1,147 +1,163 @@
 # Elara Journal v3
 
-AI-powered journaling system with memory, reflection, and adaptive behavior.
+Экспериментальная система саморефлексии на базе LLM.
+Генерирует записи, анализирует их и адаптирует своё поведение со временем.
 
 ---
 
-## Overview
+## Идея
 
-Elara Journal v3 is an experimental AI system designed to evolve from a simple text generator into a self-improving cognitive system.
-
-It generates journal entries, analyzes them, stores memory, and uses past experience to influence future outputs.
-
----
-
-## Core Features
-
-* Journal entry generation (LLM-based)
-* Semantic memory (vector embeddings)
-* Reflection system (self-analysis)
-* Feedback loop for behavior improvement
-* Automated execution (GitHub Actions)
-
----
-
-## Architecture
+Elara — это замкнутый когнитивный цикл:
 
 ```
-domain      → entities
-interfaces  → contracts
-services    → logic
-core        → orchestration
-infra       → external APIs
+контекст → генерация → рефлексия → обновление состояния → повтор
 ```
+
+Система не просто пишет текст, а **учится на собственных ошибках**.
 
 ---
 
-## Pipeline
+## Архитектура
 
-```
-buildContext → generate → embed → reflect → evaluate → store → publish
-```
+### Основной orchestrator
 
----
-
-## Tech Stack
-
-* **Generation:** Ollama Cloud
-* **Embeddings:** Voyage AI
-* **Runtime:** Node.js + TypeScript
-* **Execution:** GitHub Actions
-* **Storage:** JSON (Git-backed)
+* **JournalEngine** — управляет полным циклом выполнения
 
 ---
 
-## Memory System
+### Компоненты
 
-* Short-term memory (recent entries)
-* Semantic memory (vector similarity)
-* Reflective memory (self-analysis)
-
----
-
-## Reflection System
-
-Each entry is analyzed to extract:
-
-* quality score
-* issues
-* improvements
-* themes
-
-These signals are injected into future generations.
+* **Generator** — генерирует записи (через LLM, Ollama)
+* **Reflector** — анализирует запись (LLM)
+* **Evaluator** — проверяет валидность результата
+* **Memory** — хранение и извлечение данных
+* **EmbeddingService** — построение векторов (Voyage)
+* **Publisher** — вывод результата
 
 ---
 
-## Feedback Loop
+## Как работает система
 
-```
-entry → reflection → next entry
-```
+1. **Сбор контекста**
 
-This enables gradual behavioral change.
+   * последние записи
+   * последние рефлексии
+   * текущее состояние (`state`)
+   * семантически похожие записи (cosine similarity)
+
+2. **Генерация**
+
+   * LLM получает:
+
+     * контекст
+     * состояние
+     * предыдущие ошибки и улучшения
+
+3. **Embedding**
+
+   * запись преобразуется в вектор
+   * используется для semantic search
+
+4. **Рефлексия**
+
+   * LLM оценивает запись:
+
+     * `score`
+     * `issues`
+     * `improvements`
+     * `themes`
+
+5. **Оценка**
+
+   * базовая проверка качества
+
+6. **Обновление состояния**
+
+   * `state` изменяется на основе рефлексии
+
+7. **Сохранение**
+
+   * запись
+   * рефлексия
+   * состояние
 
 ---
 
-## Setup
+## Модель данных
 
-### 1. Install dependencies
+### Entry
+
+* `content`
+* `embedding`
+* `createdAt`
+
+### Reflection
+
+* `score` — оценка качества (0–10)
+* `issues` — проблемы
+* `improvements` — улучшения
+* `themes` — темы
+
+### State
+
+* `mood` — тон генерации
+* `themes` — активные темы
+* `drift` — степень вариативности
+* `confidence` — уверенность
+
+---
+
+## Хранение
+
+Файловая система:
 
 ```
+data/
+  entries.json
+  reflections.json
+  self-state.json
+```
+
+Особенности:
+
+* embeddings сжимаются (`toFixed(3)`)
+* используется cosine similarity для поиска
+
+---
+
+## Возможности
+
+* Саморефлексирующий цикл
+* Семантическая память
+* Контекстная генерация
+* Адаптивное поведение
+* Простая файловая архитектура
+
+---
+
+## Запуск
+
+```bash
 npm install
-```
-
----
-
-### 2. Environment variables
-
-```
-VOYAGE_API_KEY=your_key
-OLLAMA_API_KEY=your_key
-```
-
----
-
-### 3. Run locally
-
-```
 npx ts-node main.ts
 ```
 
 ---
 
-### 4. GitHub Actions
+## Ограничения
 
-Runs automatically via cron.
-
----
-
-## Current Status
-
-* Generation: stable
-* Embeddings: active
-* Memory: active
-* Reflection: integrated
-* Feedback loop: basic
+* Нет полноценной векторной БД
+* Простая эвристика оценки
+* Хранение в JSON (не масштабируется)
 
 ---
 
-## Roadmap
+## Дальнейшее развитие
 
-* stronger reflection influence
-* self-state modeling
-* memory optimization
-* vector database integration
-* external interfaces (web / bot)
-
----
-
-## Goal
-
-Transform the system from:
-
-```
-text generator → adaptive cognitive system
-```
+* Markdown / Obsidian-совместимость
+* Квантование embedding
+* Векторные базы данных
+* Более сложная модель состояния
+* Мульти-агентная рефлексия
 
 ---
