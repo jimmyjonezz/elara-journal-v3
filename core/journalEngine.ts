@@ -7,6 +7,7 @@ import { Evaluator } from "../interfaces/evaluator"
 import { Publisher } from "../interfaces/publisher"
 import { EmbeddingService } from "../interfaces/embedding"
 import { updateState } from "../services/self-state.service"
+import { compressEmbedding } from "../utils/embedding.utils"
 
 export class JournalEngine {
   constructor(
@@ -30,13 +31,15 @@ export class JournalEngine {
       reflections
     })
 
-    const embedding = await this.embedding.embed(entry.content)
-
-    if (!embedding?.length) {
+    const embeddingRaw = await this.embedding.embed(entry.content)
+      
+    if (!embeddingRaw?.length) {
       throw new Error("Embedding failed")
     }
+    
+    entry.embedding = compressEmbedding(embeddingRaw)
 
-    entry.embedding = embedding
+    //entry.embedding = embedding
 
     const reflection = await this.reflector.reflect(entry, context)
     console.log("REFLECTION OBJECT:", reflection)
