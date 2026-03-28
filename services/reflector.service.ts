@@ -14,7 +14,7 @@ export class AIReflector implements Reflector {
 
 Верни JSON:
 {
-  "score": число (0-10),
+  "score": оценка (0-10),
   "issues": массив строк,
   "improvements": массив строк,
   "themes": массив строк
