@@ -17,8 +17,13 @@ export class AIReflector implements Reflector {
   "score": оценка от 0 до 10,
   "issues": ["список выявленных проблем и недостатков"],
   "improvements": ["список конкретных рекомендаций по улучшению"],
-  "themes": ["список ключевых тем и мотивов записи"]
+  "themes": ["список ключевых тем и мотивов записи"],
+  "newInsights": ["новые выводы, которые ранее не были очевидны"]
 }
+
+ВАЖНО:
+- Возвращай только JSON
+- newInsights должны содержать только новые наблюдения, не повторяй очевидные вещи
 
 Запись:
 ${entry.content}
@@ -40,6 +45,8 @@ ${entry.content}
         issues: parsed.issues ?? [],
         improvements: parsed.improvements ?? [],
         themes: parsed.themes ?? [],
+        newInsights: parsed.newInsights ?? [],
+
         createdAt: new Date()
       }
 
@@ -54,6 +61,8 @@ ${entry.content}
         issues: [],
         improvements: [],
         themes: [],
+        newInsights: [],
+
         createdAt: new Date()
       }
     }
