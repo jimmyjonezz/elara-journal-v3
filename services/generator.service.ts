@@ -26,35 +26,36 @@ export class AIGenerator implements Generator {
     const basePrompt = promptObj.template
 
     const avoidBlock = issues.length
-      ? `Avoid:\n${issues.join("\n")}`
+      ? `Ограничения:\n${issues.join("\n")}`
       : ""
 
     const improveBlock = improvements.length
-      ? `Improve:\n${improvements.join("\n")}`
+      ? `Улучшения:\n${improvements.join("\n")}`
       : ""
 
     const prompt = `
 ${basePrompt}
 
 # Internal State
-Mood: ${state.mood}
-Themes: ${state.themes.join(", ")}
-Drift: ${state.drift}
-Confidence: ${state.confidence}
+# Внутреннее состояние
+Настроение: ${state.mood}
+Темы: ${state.themes.join(", ")}
+Дрейф: ${state.drift}
+Уверенность: ${state.confidence}
 
-# Context
-Recent entries:
+# Контекст
+Последние записи:
 ${recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n")}
 
-# Constraints
-- Do not repeat structure or phrasing
-- High drift → change structure significantly
+# Ограничения
+- Не повторяй структуру или формулировки
+- Высокий дрейф → значительно измени структуру
 
 ${avoidBlock}
 ${improveBlock}
 
-# Task
-Write the next journal entry.
+# Задача
+Напиши следующую журнальную запись.
 `
 
     const content = await this.llm.generate(prompt)
