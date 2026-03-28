@@ -9,17 +9,17 @@ export class AIReflector implements Reflector {
 
   async reflect(entry: any, context: any): Promise<Reflection> {
     const prompt = `
-Analyze the journal entry.
+Проанализируй эту дневниковую запись.
 
-Return JSON:
+Верни JSON:
 {
-  "score": number (0-10),
-  "issues": string[],
-  "improvements": string[],
-  "themes": string[]
+  "score": число (0-10),
+  "issues": массив строк,
+  "improvements": массив строк,
+  "themes": массив строк
 }
 
-Entry:
+Запись:
 ${entry.content}
 `
 
