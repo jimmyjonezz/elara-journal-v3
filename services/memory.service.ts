@@ -9,8 +9,7 @@ import { Reflection } from "../domain/reflection"
 import { Context } from "../domain/context"
 import { EmbeddingService } from "../interfaces/embedding"
 import { SelfState } from "../domain/self-state"
-import { cosineSimilarity } from "../utils/vector.utils"
-import { normalizeEmbedding } from "../utils/embedding.utils"
+import { cosineSimilarity } from "./vector.utils"
 
 export class JsonMemoryService implements Memory {
   private filePath = path.resolve("data/entries.json")
@@ -31,30 +30,30 @@ export class JsonMemoryService implements Memory {
       return raw.map((e: any) => ({
         ...e,
         createdAt: new Date(e.createdAt),
-        embedding: normalizeEmbedding(e.embedding)
+        embedding: Array.isArray(e.embedding)
+          ? e.embedding.map((v: number) => +v)
+          : []
       }))
     } catch {
       return []
     }
   }
 
-  // memory.service.ts
+  private write(entries: Entry[]) {
+    fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
 
-private write(entries: Entry[]) {
-  fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
+    const json = JSON.stringify(entries, null, 2)
 
-  const json = JSON.stringify(entries, null, 2)
+    // схлопываем embedding в одну строку
+    const compact = json.replace(
+      /"embedding": \[\s*([^\]]+?)\s*\]/g,
+      (_, content) => {
+        return `"embedding": [${content.replace(/\s+/g, " ")}]`
+      }
+    )
 
-  // 🔧 схлопываем embedding массивы в одну строку
-  const compact = json.replace(
-    /"embedding": \[\s*([^\]]+?)\s*\]/g,
-    (_, content) => {
-      return `"embedding": [${content.replace(/\s+/g, " ")}]`
-    }
-  )
-
-  fs.writeFileSync(this.filePath, compact)
-}
+    fs.writeFileSync(this.filePath, compact)
+  }
 
   private readReflections(): Reflection[] {
     if (!fs.existsSync(this.reflectionPath)) return []
@@ -68,6 +67,7 @@ private write(entries: Entry[]) {
 
   private writeReflections(reflections: Reflection[]) {
     fs.mkdirSync(path.dirname(this.reflectionPath), { recursive: true })
+
     fs.writeFileSync(
       this.reflectionPath,
       JSON.stringify(reflections, null, 2)
@@ -83,9 +83,11 @@ private write(entries: Entry[]) {
       const initial: SelfState = {
         mood: "calm",
         themes: [],
+        insights: [], // ✅ добавлено
         drift: 0.3,
         confidence: 0.5
       }
+
       await this.saveSelfState(initial)
       return initial
     }
@@ -98,13 +100,16 @@ private write(entries: Entry[]) {
       return {
         mood: raw.mood || "calm",
         themes: raw.themes || [],
+        insights: raw.insights || [], // ✅ добавлено
         drift: raw.drift ?? 0.3,
         confidence: raw.confidence ?? 0.5
       }
+
     } catch {
       return {
         mood: "calm",
         themes: [],
+        insights: [], // ✅ добавлено
         drift: 0.3,
         confidence: 0.5
       }
@@ -147,7 +152,7 @@ private write(entries: Entry[]) {
   }
 
   // -----------------------
-  // Semantic + context
+  // Semantic search
   // -----------------------
 
   async searchSemantic(query: string, limit: number): Promise<Entry[]> {
@@ -167,27 +172,29 @@ private write(entries: Entry[]) {
       .map(e => e.entry)
   }
 
-  // services/memory.service.ts
+  // -----------------------
+  // Context
+  // -----------------------
 
-async buildContext(): Promise<Context> {
-  const recentEntries = await this.getRecent(5)
-  const reflections = await this.getRecentReflections(3)
-  const state = await this.getSelfState()
+  async buildContext(): Promise<Context> {
+    const recentEntries = await this.getRecent(5)
+    const reflections = await this.getRecentReflections(3)
+    const state = await this.getSelfState()
 
-  const semanticMatches =
-    recentEntries.length > 0
-      ? await this.searchSemantic(
-          recentEntries[0].content,
-          3
-        )
-      : []
+    const semanticMatches =
+      recentEntries.length > 0
+        ? await this.searchSemantic(
+            recentEntries[0].content,
+            3
+          )
+        : []
 
-  return {
-    recentEntries,
-    semanticMatches,
-    reflections,
-    state,
-    workingMemory: []
+    return {
+      recentEntries,
+      semanticMatches,
+      reflections,
+      state,
+      workingMemory: []
+    }
   }
-}
 }
