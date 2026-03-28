@@ -34,8 +34,6 @@ jobs:
         run: |
           git config user.name "elara-bot"
           git config user.email "bot@elara.ai"
-          git add data/entries.json
-          git add data/reflections.json
           git add data/*.json
           git commit -m "Update journal entries" || echo "No changes"
           git push
