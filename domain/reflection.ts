@@ -10,5 +10,9 @@ export interface Reflection {
   issues: string[]
   improvements: string[]
   themes: string[]
+
+  // ✅ новое поле
+  newInsights: string[]
+
   createdAt: Date
 }
