@@ -21,41 +21,44 @@ export class AIGenerator implements Generator {
     const issues = reflections.flatMap(r => r?.issues ?? [])
     const improvements = reflections.flatMap(r => r?.improvements ?? [])
 
-    // ✅ исправлено здесь
-    const promptObj = await this.prompts.getPrompt("generation")
-    const basePrompt = promptObj.template
+    const basePrompt = (await this.prompts.getPrompt("journal")).template
 
     const avoidBlock = issues.length
-      ? `Ограничения:\n${issues.join("\n")}`
+      ? `Avoid:\n${issues.join("\n")}`
       : ""
 
     const improveBlock = improvements.length
-      ? `Улучшения:\n${improvements.join("\n")}`
+      ? `Improve:\n${improvements.join("\n")}`
+      : ""
+
+    const insightsBlock = state.insights?.length
+      ? `\n# Learned Insights\n${state.insights.join("\n")}\nDo not repeat them. Build on them.\n`
       : ""
 
     const prompt = `
 ${basePrompt}
 
 # Internal State
-# Внутреннее состояние
-Настроение: ${state.mood}
-Темы: ${state.themes.join(", ")}
-Дрейф: ${state.drift}
-Уверенность: ${state.confidence}
+Mood: ${state.mood}
+Themes: ${state.themes.join(", ")}
+Drift: ${state.drift}
+Confidence: ${state.confidence}
 
-# Контекст
-Последние записи:
+${insightsBlock}
+
+# Context
+Recent entries:
 ${recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n")}
 
-# Ограничения
-- Не повторяй структуру или формулировки
-- Высокий дрейф → значительно измени структуру
+# Constraints
+- Do not repeat structure or phrasing
+- High drift → change structure significantly
 
 ${avoidBlock}
 ${improveBlock}
 
-# Задача
-Напиши следующую журнальную запись.
+# Task
+Write the next journal entry.
 `
 
     const content = await this.llm.generate(prompt)
