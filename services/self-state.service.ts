@@ -19,7 +19,7 @@ export function updateState(
     ? Math.min(1, prev.drift + 0.15)
     : prev.drift * 0.97
 
-  // --- Confidence (плавная реакция на score) ---
+  // --- Confidence ---
   const score = reflection.score ?? 0.5
 
   const confidenceDelta = (score - 0.5) * 0.2
@@ -28,7 +28,7 @@ export function updateState(
     Math.min(1, prev.confidence + confidenceDelta)
   )
 
-  // --- Themes (нормализация) ---
+  // --- Themes ---
   const normalize = (t: string) => t.toLowerCase().trim()
 
   const themes = Array.from(
@@ -38,7 +38,15 @@ export function updateState(
     ])
   ).slice(0, 5)
 
-  // --- Mood (зависит от состояния) ---
+  // --- Insights (новое) ---
+  const insights = Array.from(
+    new Set([
+      ...(prev.insights || []),
+      ...(reflection.newInsights || [])
+    ])
+  ).slice(0, 10)
+
+  // --- Mood ---
   let mood: SelfState["mood"]
 
   if (drift > 0.7) {
@@ -54,6 +62,7 @@ export function updateState(
   return {
     mood,
     themes,
+    insights,
     drift,
     confidence
   }
