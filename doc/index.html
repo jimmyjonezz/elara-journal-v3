@@ -1,21 +1,78 @@
-<!-- docs/index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <title>Elara Journal</title>
+
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #d4d4d4;
+      font-family: -apple-system, monospace;
+      max-width: 800px;
+      margin: 40px auto;
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      margin-top: 40px;
+      color: #ffffff;
+    }
+
+    .section {
+      margin-top: 30px;
+    }
+
+    .entry {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #333;
+    }
+
+    .meta {
+      color: #888;
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border: 1px solid #555;
+      margin-right: 5px;
+      font-size: 12px;
+    }
+
+    pre {
+      background: #111;
+      padding: 10px;
+      overflow-x: auto;
+    }
+  </style>
 </head>
+
 <body>
+
   <h1>Elara Journal</h1>
 
-  <h2>State</h2>
-  <pre id="state"></pre>
+  <div class="section">
+    <h2>State</h2>
+    <pre id="state"></pre>
+  </div>
 
-  <h2>Latest Entries</h2>
-  <div id="entries"></div>
+  <div class="section">
+    <h2>Latest Entries</h2>
+    <div id="entries"></div>
+  </div>
 
-  <h2>Latest Reflections</h2>
-  <div id="reflections"></div>
+  <div class="section">
+    <h2>Reflections</h2>
+    <div id="reflections"></div>
+  </div>
 
   <script>
     async function load() {
@@ -25,27 +82,29 @@
         fetch("../data/self-state.json").then(r => r.json())
       ])
 
-      // state
       document.getElementById("state").textContent =
         JSON.stringify(state, null, 2)
 
-      // entries
       const entriesEl = document.getElementById("entries")
       entries.slice(-5).reverse().forEach(e => {
         const div = document.createElement("div")
-        div.innerHTML = `<p>${e.content}</p><hr/>`
+        div.className = "entry"
+        div.innerHTML = `
+          <div class="meta">${new Date(e.createdAt).toLocaleString()}</div>
+          <div>${e.content}</div>
+        `
         entriesEl.appendChild(div)
       })
 
-      // reflections
       const reflEl = document.getElementById("reflections")
       reflections.slice(-5).reverse().forEach(r => {
         const div = document.createElement("div")
+        div.className = "entry"
         div.innerHTML = `
-          <p><b>Score:</b> ${r.score}</p>
-          <p><b>Issues:</b> ${r.issues.join(", ")}</p>
-          <p><b>Improvements:</b> ${r.improvements.join(", ")}</p>
-          <hr/>
+          <div class="meta">Score: ${r.score}</div>
+          <div>
+            ${r.issues.map(i => `<span class="badge">${i}</span>`).join("")}
+          </div>
         `
         reflEl.appendChild(div)
       })
@@ -53,5 +112,6 @@
 
     load()
   </script>
+
 </body>
 </html>
