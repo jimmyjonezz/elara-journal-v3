@@ -3,6 +3,7 @@
 import { Reflector } from "../interfaces/reflector"
 import { Reflection } from "../domain/reflection"
 import { randomUUID } from "crypto"
+import { extractJSON } from "../utils/json.utils"
 
 export class AIReflector implements Reflector {
   constructor(private llm: any, private prompts: any) {}
@@ -26,7 +27,8 @@ ${entry.content}
     const raw = await this.llm.generate(prompt)
 
     try {
-      const parsed = JSON.parse(raw)
+      const json = extractJSON(raw)
+      const parsed = JSON.parse(json)
 
       return {
         id: randomUUID(),
