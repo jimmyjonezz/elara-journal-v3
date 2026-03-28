@@ -9,7 +9,7 @@ import { Reflection } from "../domain/reflection"
 import { Context } from "../domain/context"
 import { EmbeddingService } from "../interfaces/embedding"
 import { SelfState } from "../domain/self-state"
-import { cosineSimilarity } from "./vector.utils"
+import { cosineSimilarity } from "../utils/vector.utils"
 
 export class JsonMemoryService implements Memory {
   private filePath = path.resolve("data/entries.json")
