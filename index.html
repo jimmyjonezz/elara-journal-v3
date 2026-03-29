@@ -77,9 +77,9 @@
   <script>
     async function load() {
       const [entries, reflections, state] = await Promise.all([
-        fetch("./data/entries.json").then(r => r.json()),
-        fetch("./data/reflections.json").then(r => r.json()),
-        fetch("./data/self-state.json").then(r => r.json())
+        fetch("/data/entries.json").then(r => r.json()),
+        fetch("/data/reflections.json").then(r => r.json()),
+        fetch("/data/self-state.json").then(r => r.json())
       ])
 
       document.getElementById("state").textContent =
