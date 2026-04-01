@@ -4,36 +4,30 @@ import { Reflector } from "../interfaces/reflector"
 import { Reflection } from "../domain/reflection"
 import { randomUUID } from "crypto"
 import { extractJSON } from "../utils/json.utils"
-import { FilePromptManager } from "./prompt.service"
 
 export class AIReflector implements Reflector {
-  constructor(
-    private llm: any,
-    private prompts: FilePromptManager
-  ) {}
+  constructor(private llm: any, private prompts: any) {}
 
   async reflect(entry: any, context: any): Promise<Reflection> {
-    const promptData = await this.prompts.getPrompt("reflection")
+    const prompt = `
+Проанализируй эту дневниковую запись.
 
-    const outputFormat = `Верни JSON:
+Верни JSON:
 {
   "score": оценка от 0 до 10,
   "issues": ["список выявленных проблем и недостатков"],
   "improvements": ["список конкретных рекомендаций по улучшению"],
   "themes": ["список ключевых тем и мотивов записи"],
-  "newInsights": ["новые выводы, которые ранее не были очевидны"],
-  "secondary": ["оттенки настроения: дополнительные эмоции или состояния, уточняющие основное"]
+  "newInsights": ["новые выводы, которые ранее не были очевидны"]
 }
 
 ВАЖНО:
 - Возвращай только JSON
 - newInsights должны содержать только новые наблюдения, не повторяй очевидные вещи
-- secondary: добавь если текст содержит оттенки настроения (ностальгия, теплота, тревога и т.п.)`
 
-    const prompt = this.prompts.render(promptData.template, {
-      output_format: outputFormat,
-      entry: entry.content
-    })
+Запись:
+${entry.content}
+`
 
     const raw = await this.llm.generate(prompt)
 
@@ -52,7 +46,6 @@ export class AIReflector implements Reflector {
         improvements: parsed.improvements ?? [],
         themes: parsed.themes ?? [],
         newInsights: parsed.newInsights ?? [],
-        secondary: parsed.secondary ?? [],
 
         createdAt: new Date()
       }
@@ -69,7 +62,6 @@ export class AIReflector implements Reflector {
         improvements: [],
         themes: [],
         newInsights: [],
-        secondary: [],
 
         createdAt: new Date()
       }
