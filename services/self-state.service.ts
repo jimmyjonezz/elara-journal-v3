@@ -1,23 +1,7 @@
 // services/self-state.service.ts
 
-import { SelfState, MoodPrimary } from "../domain/self-state"
+import { SelfState } from "../domain/self-state"
 import { Reflection } from "../domain/reflection"
-
-function getPrimaryMood(drift: number, confidence: number, score: number): MoodPrimary {
-  if (drift > 0.7) return "calm"
-  if (confidence > 0.75) return "curious"
-  if (score < 0.4) return "gentle"
-  if (score > 0.8) return "energetic"
-  if (drift < 0.3) return "focused"
-  return "reflective"
-}
-
-function getIntensity(score: number, drift: number): number {
-  const base = score
-  const driftFactor = drift * 0.3
-  const raw = Math.min(1, Math.max(0, base - driftFactor))
-  return Math.round(raw * 10) / 10
-}
 
 export function updateState(
   prev: SelfState,
@@ -54,7 +38,7 @@ export function updateState(
     ])
   ).slice(0, 5)
 
-  // --- Insights ---
+  // --- Insights (новое) ---
   const insights = Array.from(
     new Set([
       ...(prev.insights || []),
@@ -63,20 +47,16 @@ export function updateState(
   ).slice(0, 10)
 
   // --- Mood ---
-  const primary = getPrimaryMood(drift, confidence, score)
-  const intensity = getIntensity(score, drift)
+  let mood: SelfState["mood"]
 
-  const secondary = Array.from(
-    new Set([
-      ...(prev.mood?.secondary || []),
-      ...(reflection.secondary || [])
-    ])
-  ).slice(0, 5)
-
-  const mood = {
-    primary,
-    secondary,
-    intensity
+  if (drift > 0.7) {
+    mood = "calm"
+  } else if (confidence > 0.75) {
+    mood = "curious"
+  } else if (score < 0.4) {
+    mood = "gentle"
+  } else {
+    mood = "reflective"
   }
 
   return {

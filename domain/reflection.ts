@@ -11,9 +11,8 @@ export interface Reflection {
   improvements: string[]
   themes: string[]
 
+  // ✅ новое поле
   newInsights: string[]
-
-  secondary: string[]
 
   createdAt: Date
 }

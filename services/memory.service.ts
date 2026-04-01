@@ -15,7 +15,6 @@ export class JsonMemoryService implements Memory {
   private filePath = path.resolve("data/entries.json")
   private reflectionPath = path.resolve("data/reflections.json")
   private selfStatePath = path.resolve("data/self-state.json")
-  private embeddingsPath = path.resolve("data/embeddings.json")
 
   constructor(private embedding: EmbeddingService) {}
 
@@ -23,68 +22,37 @@ export class JsonMemoryService implements Memory {
   // Internal helpers
   // -----------------------
 
-  private readEmbeddings(): Record<string, number[]> {
-    if (!fs.existsSync(this.embeddingsPath)) return {}
-
-    try {
-      return JSON.parse(fs.readFileSync(this.embeddingsPath, "utf-8"))
-    } catch {
-      return {}
-    }
-  }
-
-  private writeEmbeddings(embeddings: Record<string, number[]>): void {
-    fs.mkdirSync(path.dirname(this.embeddingsPath), { recursive: true })
-
-    const compact: Record<string, string> = {}
-    for (const [id, vec] of Object.entries(embeddings)) {
-      compact[id] = `[${vec.join(", ")}]`
-    }
-
-    const json = JSON.stringify(compact, null, 2)
-      .replace(/"\[/g, "[")
-      .replace(/\]"/g, "]")
-
-    fs.writeFileSync(this.embeddingsPath, json)
-  }
-
   private read(): Entry[] {
     if (!fs.existsSync(this.filePath)) return []
 
     try {
       const raw = JSON.parse(fs.readFileSync(this.filePath, "utf-8"))
-      const storedEmbeddings = this.readEmbeddings()
-
       return raw.map((e: any) => ({
         ...e,
         createdAt: new Date(e.createdAt),
-        embedding: storedEmbeddings[e.id] || e.embedding || []
+        embedding: Array.isArray(e.embedding)
+          ? e.embedding.map((v: number) => +v)
+          : []
       }))
     } catch {
       return []
     }
   }
 
-  private write(entries: Entry[]): void {
+  private write(entries: Entry[]) {
     fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
 
-    const entriesWithoutEmbedding = entries.map((e: Entry) => {
-      const { embedding, ...rest } = e as any
-      return rest
-    })
+    const json = JSON.stringify(entries, null, 2)
 
-    fs.writeFileSync(
-      this.filePath,
-      JSON.stringify(entriesWithoutEmbedding, null, 2)
+    // схлопываем embedding в одну строку
+    const compact = json.replace(
+      /"embedding": \[\s*([^\]]+?)\s*\]/g,
+      (_, content) => {
+        return `"embedding": [${content.replace(/\s+/g, " ")}]`
+      }
     )
-  }
 
-  private saveEmbedding(id: string, embedding: number[]): void {
-    const embeddings = this.readEmbeddings()
-    if (embedding.length) {
-      embeddings[id] = embedding
-      this.writeEmbeddings(embeddings)
-    }
+    fs.writeFileSync(this.filePath, compact)
   }
 
   private readReflections(): Reflection[] {
@@ -113,13 +81,9 @@ export class JsonMemoryService implements Memory {
   async getSelfState(): Promise<SelfState> {
     if (!fs.existsSync(this.selfStatePath)) {
       const initial: SelfState = {
-        mood: {
-          primary: "calm",
-          secondary: [],
-          intensity: 0.5
-        },
+        mood: "calm",
         themes: [],
-        insights: [],
+        insights: [], // ✅ добавлено
         drift: 0.3,
         confidence: 0.5
       }
@@ -133,31 +97,19 @@ export class JsonMemoryService implements Memory {
         fs.readFileSync(this.selfStatePath, "utf-8")
       )
 
-      const mood = typeof raw.mood === "string"
-        ? { primary: "calm" as const, secondary: [], intensity: 0.5 }
-        : {
-            primary: raw.mood?.primary || "calm",
-            secondary: raw.mood?.secondary || [],
-            intensity: raw.mood?.intensity ?? 0.5
-          }
-
       return {
-        mood,
+        mood: raw.mood || "calm",
         themes: raw.themes || [],
-        insights: raw.insights || [],
+        insights: raw.insights || [], // ✅ добавлено
         drift: raw.drift ?? 0.3,
         confidence: raw.confidence ?? 0.5
       }
 
     } catch {
       return {
-        mood: {
-          primary: "calm",
-          secondary: [],
-          intensity: 0.5
-        },
+        mood: "calm",
         themes: [],
-        insights: [],
+        insights: [], // ✅ добавлено
         drift: 0.3,
         confidence: 0.5
       }
@@ -191,10 +143,6 @@ export class JsonMemoryService implements Memory {
     const entries = this.read()
     entries.push(entry)
     this.write(entries)
-
-    if (entry.embedding?.length) {
-      this.saveEmbedding(entry.id, entry.embedding)
-    }
   }
 
   async storeReflection(reflection: Reflection): Promise<void> {
