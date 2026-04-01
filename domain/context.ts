@@ -1,13 +1,7 @@
 // domain/context.ts
 import { Entry } from "./entry"
 import { Reflection } from "./reflection"
-
-export interface SelfState {
-  mood: string
-  themes: string[]
-  drift: number
-  confidence: number
-}
+import { SelfState } from "./self-state"
 
 export interface Context {
   recentEntries: Entry[]

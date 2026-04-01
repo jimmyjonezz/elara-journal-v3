@@ -1,113 +1,277 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
   <title>Elara Journal</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       background: #0d0d0d;
       color: #d4d4d4;
-      font-family: -apple-system, monospace;
-      max-width: 800px;
-      margin: 40px auto;
-      line-height: 1.6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      line-height: 1.7;
     }
 
     h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
+      font-size: 36px;
+      font-weight: 300;
+      margin-bottom: 8px;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 13px;
+      margin-bottom: 40px;
     }
 
     h2 {
-      margin-top: 40px;
-      color: #ffffff;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #888;
+      margin-top: 35px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 8px;
     }
 
-    .section {
-      margin-top: 30px;
-    }
-
-    .entry {
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #333;
+    .card {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
     }
 
     .meta {
-      color: #888;
+      color: #555;
       font-size: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .content {
+      color: #ccc;
+      white-space: pre-wrap;
+      font-size: 15px;
+      line-height: 1.8;
     }
 
     .badge {
       display: inline-block;
-      padding: 2px 6px;
-      border: 1px solid #555;
-      margin-right: 5px;
-      font-size: 12px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #888;
+      margin: 2px;
     }
 
-    pre {
-      background: #111;
-      padding: 10px;
-      overflow-x: auto;
+    .stat {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: #555;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .stat-value.mood {
+      color: #7dd3c0;
+    }
+
+    .stat-value.intensity {
+      color: #c0a0d3;
+    }
+
+    .empty {
+      color: #444;
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    .error {
+      color: #c44;
+      font-size: 13px;
+      padding: 12px;
+      background: #1a0a0a;
+      border-radius: 4px;
     }
   </style>
 </head>
-
 <body>
 
-  <h1>Elara Journal</h1>
+  <h1>ELARA</h1>
+  <div class="subtitle">саморефлексирующий дневник</div>
 
-  <div class="section">
-    <h2>State</h2>
-    <pre id="state"></pre>
+  <h2>Состояние</h2>
+  <div id="state" class="card">
+    <div class="stat" id="stateStats"></div>
   </div>
 
-  <div class="section">
-    <h2>Latest Entries</h2>
-    <div id="entries"></div>
-  </div>
+  <h2>Последняя запись</h2>
+  <div id="latestEntry"></div>
 
-  <div class="section">
-    <h2>Reflections</h2>
-    <div id="reflections"></div>
-  </div>
+  <h2>Рефлексия</h2>
+  <div id="reflections"></div>
 
   <script>
     async function load() {
-      const [entries, reflections, state] = await Promise.all([
-        fetch("./data/entries.json").then(r => r.json()),
-        fetch("./data/reflections.json").then(r => r.json()),
-        fetch("./data/self-state.json").then(r => r.json())
-      ])
+      try {
+        const [entries, reflections, state] = await Promise.all([
+          fetch("./data/entries.json").then(r => r.ok ? r.json() : []),
+          fetch("./data/reflections.json").then(r => r.ok ? r.json() : []),
+          fetch("./data/self-state.json").then(r => r.ok ? r.json() : null)
+        ])
 
-      document.getElementById("state").textContent =
-        JSON.stringify(state, null, 2)
+        renderState(state)
+        renderLatestEntry(entries)
+        renderReflections(reflections)
+      } catch (e) {
+        document.body.innerHTML += `<div class="error">Ошибка загрузки: ${e.message}</div>`
+      }
+    }
 
-      const entriesEl = document.getElementById("entries")
-      entries.slice(-5).reverse().forEach(e => {
-        const div = document.createElement("div")
-        div.className = "entry"
-        div.innerHTML = `
-          <div class="meta">${new Date(e.createdAt).toLocaleString()}</div>
-          <div>${e.content}</div>
-        `
-        entriesEl.appendChild(div)
+    function renderState(state) {
+      const el = document.getElementById("stateStats")
+      if (!state) {
+        el.innerHTML = "<span class='empty'>Нет данных</span>"
+        return
+      }
+
+      const mood = state.mood || {}
+      const primary = mood.primary || "—"
+      const secondary = mood.secondary?.length ? mood.secondary.join(", ") : ""
+      const intensity = mood.intensity?.toFixed(1) || "—"
+
+      el.innerHTML = `
+        <div class="stat-item">
+          <span class="stat-label">Настроение</span>
+          <span class="stat-value mood">${primary}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Интенсивность</span>
+          <span class="stat-value intensity">${intensity}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Drift</span>
+          <span class="stat-value">${(state.drift || 0).toFixed(2)}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Confidence</span>
+          <span class="stat-value">${(state.confidence || 0).toFixed(2)}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Темы</span>
+          <span class="stat-value">${(state.themes || []).slice(0, 3).join(", ") || "—"}</span>
+        </div>
+      `
+    }
+
+    function renderLatestEntry(entries) {
+      const el = document.getElementById("latestEntry")
+      
+      if (!entries?.length) {
+        el.innerHTML = "<div class='empty'>Записей пока нет</div>"
+        return
+      }
+
+      const entry = entries[entries.length - 1]
+      const date = new Date(entry.createdAt).toLocaleString("ru-RU", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
       })
 
-      const reflEl = document.getElementById("reflections")
-      reflections.slice(-5).reverse().forEach(r => {
-        const div = document.createElement("div")
-        div.className = "entry"
-        div.innerHTML = `
-          <div class="meta">Score: ${r.score}</div>
-          <div>
-            ${r.issues.map(i => `<span class="badge">${i}</span>`).join("")}
+      el.innerHTML = `
+        <div class="card">
+          <div class="meta">
+            <span>${date}</span>
           </div>
-        `
-        reflEl.appendChild(div)
+          <div class="content">${entry.content}</div>
+        </div>
+      `
+    }
+
+    function renderReflections(reflections) {
+      const el = document.getElementById("reflections")
+      
+      if (!reflections?.length) {
+        el.innerHTML = "<div class='empty'>Рефлексий пока нет</div>"
+        return
+      }
+
+      const latest = reflections[reflections.length - 1]
+      const date = new Date(latest.createdAt).toLocaleString("ru-RU", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
       })
+
+      const issues = latest.issues?.length 
+        ? latest.issues.map(i => `<span class="badge">${i}</span>`).join("")
+        : "<span class='empty'>нет</span>"
+
+      const improvements = latest.improvements?.length
+        ? latest.improvements.map(i => `<span class="badge">${i}</span>`).join("")
+        : "<span class='empty'>нет</span>"
+
+      const themes = latest.themes?.length
+        ? latest.themes.map(t => `<span class="badge">${t}</span>`).join("")
+        : "<span class='empty'>нет</span>"
+
+      el.innerHTML = `
+        <div class="card">
+          <div class="meta">
+            <span>Оценка: <strong style="color:#fff">${latest.score}/10</strong></span>
+            <span>${date}</span>
+          </div>
+          
+          <div style="margin-top:12px">
+            <div style="font-size:11px;color:#555;margin-bottom:6px">ПРОБЛЕМЫ</div>
+            <div>${issues}</div>
+          </div>
+          
+          <div style="margin-top:12px">
+            <div style="font-size:11px;color:#555;margin-bottom:6px">УЛУЧШЕНИЯ</div>
+            <div>${improvements}</div>
+          </div>
+          
+          <div style="margin-top:12px">
+            <div style="font-size:11px;color:#555;margin-bottom:6px">ТЕМЫ</div>
+            <div>${themes}</div>
+          </div>
+        </div>
+      `
     }
 
     load()

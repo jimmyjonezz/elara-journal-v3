@@ -1,5 +1,7 @@
 // main.ts
 
+import "dotenv/config"
+
 import { JournalEngine } from "./core/journalEngine"
 
 import { JsonMemoryService } from "./services/memory.service"
@@ -9,21 +11,16 @@ import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 
 import { OllamaClient } from "./infra/llm/ollama.client"
-import { VoyageClient } from "./infra/llm/voyage.client"
-import { VoyageEmbeddingService } from "./services/embedding.service"
 
 import { FilePromptManager } from "./services/prompt.service"
 
 async function main() {
-  // --- LLM ---
+  // --- LLM + Embedding (Ollama) ---
   const llm = new OllamaClient()
+  const embedding = llm
 
   // --- Prompts ---
   const prompts = new FilePromptManager()
-
-  // --- Embedding ---
-  const voyage = new VoyageClient()
-  const embedding = new VoyageEmbeddingService(voyage)
 
   // --- Memory ---
   const memory = new JsonMemoryService(embedding)
