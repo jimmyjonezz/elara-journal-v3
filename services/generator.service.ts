@@ -16,12 +16,12 @@ export class AIGenerator implements Generator {
   async generate(
     context: Context & { state: SelfState; reflections: any[] }
   ): Promise<Entry> {
-    const { recentEntries, semanticMatches, state, reflections } = context
+    const { recentEntries, state, reflections } = context
 
     const issues = reflections.flatMap(r => r?.issues ?? [])
     const improvements = reflections.flatMap(r => r?.improvements ?? [])
 
-    const basePrompt = (await this.prompts.getPrompt("generation")).template
+    const promptData = await this.prompts.getPrompt("generation")
 
     const avoidBlock = issues.length
       ? `Avoid:\n${issues.join("\n")}`
@@ -32,34 +32,39 @@ export class AIGenerator implements Generator {
       : ""
 
     const insightsBlock = state.insights?.length
-      ? `\n# Learned Insights\n${state.insights.join("\n")}\nDo not repeat them. Build on them.\n`
+      ? `# Learned Insights\n${state.insights.join("\n")}\nDo not repeat them. Build on them.`
       : ""
 
-    const prompt = `
-${basePrompt}
+    const moodBlock = `Mood: ${state.mood.primary} (intensity: ${state.mood.intensity})
+${state.mood.secondary.length ? `Secondary: ${state.mood.secondary.join(", ")}` : ""}`
 
-# Internal State
-Mood: ${state.mood}
+    const stateBlock = `# Internal State
+${moodBlock}
 Themes: ${state.themes.join(", ")}
 Drift: ${state.drift}
 Confidence: ${state.confidence}
 
-${insightsBlock}
+${insightsBlock}`
 
-# Context
-Recent entries:
-${recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n")}
-
-# Constraints
+    const constraintsBlock = `# Constraints
 - Do not repeat structure or phrasing
 - High drift → change structure significantly
-
 ${avoidBlock}
-${improveBlock}
+${improveBlock}`
 
-# Task
-Write the next journal entry.
-`
+    const contextBlock = `# Context
+Recent entries:
+${recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n")}`
+
+    const taskBlock = `# Task
+Write the next journal entry.`
+
+    const prompt = this.prompts.render(promptData.template, {
+      state: stateBlock,
+      constraints: constraintsBlock,
+      context: contextBlock,
+      Task: taskBlock
+    })
 
     const content = await this.llm.generate(prompt)
 

@@ -5,10 +5,7 @@ export class OllamaClient {
 
   constructor() {
     this.client = new Ollama({
-      host: "https://ollama.com",
-      headers: {
-        Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`
-      }
+      host: process.env.OLLAMA_HOST || "http://localhost:11434"
     })
   }
 
@@ -32,20 +29,12 @@ export class OllamaClient {
   async embed(text: string): Promise<number[]> {
     try {
       const res: any = await this.client.embeddings({
-        model: "ollama pull nomic-embed-text-v2-moe",
+        model: "nomic-embed-text",
         prompt: text
       })
 
-      // Лог для диагностики (можно убрать позже)
-      console.log("RAW EMBED RESPONSE:", res)
-
-      // Поддержка разных форматов ответа
       if (res.embedding && Array.isArray(res.embedding)) {
         return res.embedding
-      }
-
-      if (res.embeddings && Array.isArray(res.embeddings) && res.embeddings.length > 0) {
-        return res.embeddings[0]
       }
 
       throw new Error("Invalid embedding response format")
