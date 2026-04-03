@@ -7,7 +7,7 @@ import { Evaluator } from "../interfaces/evaluator"
 import { Publisher } from "../interfaces/publisher"
 import { EmbeddingService } from "../interfaces/embedding"
 import { updateState } from "../services/self-state.service"
-import { compressEmbedding } from "../utils/embedding.utils"
+import { normalizeEmbedding } from "../utils/embedding.utils"
 
 export class JournalEngine {
   constructor(
@@ -37,12 +37,9 @@ export class JournalEngine {
       throw new Error("Embedding failed")
     }
     
-    entry.embedding = compressEmbedding(embeddingRaw)
-
-    //entry.embedding = embedding
+    entry.embedding = normalizeEmbedding(embeddingRaw)
 
     const reflection = await this.reflector.reflect(entry, context)
-    //console.log("REFLECTION OBJECT:", reflection)
     const evaluation = await this.evaluator.evaluate(entry)
 
     if (!evaluation.valid) return
