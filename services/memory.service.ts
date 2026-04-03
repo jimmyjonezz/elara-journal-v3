@@ -15,8 +15,66 @@ export class JsonMemoryService implements Memory {
   private filePath = path.resolve("data/entries.json")
   private reflectionPath = path.resolve("data/reflections.json")
   private selfStatePath = path.resolve("data/self-state.json")
+  private embeddingsPath = path.resolve("data/embeddings.json")
 
   constructor(private embedding: EmbeddingService) {}
+
+  // -----------------------
+  // Embeddings
+  // -----------------------
+
+  private readEmbeddings(): Record<string, number[]> {
+    if (!fs.existsSync(this.embeddingsPath)) return {}
+
+    try {
+      const raw = JSON.parse(fs.readFileSync(this.embeddingsPath, "utf-8"))
+
+      if (Array.isArray(raw)) {
+        const result: Record<string, number[]> = {}
+        for (const item of raw) {
+          if (item.id && Array.isArray(item.embedding)) {
+            result[item.id] = item.embedding
+          }
+        }
+        return result
+      }
+
+      return raw as Record<string, number[]>
+    } catch {
+      return {}
+    }
+  }
+
+  private writeEmbeddings(embeddings: Record<string, number[]>) {
+    fs.mkdirSync(path.dirname(this.embeddingsPath), { recursive: true })
+
+    const entries = Object.entries(embeddings).map(([id, vector]) => ({
+      id,
+      embedding: vector
+    }))
+
+    const json = JSON.stringify(entries, null, 2)
+
+    const compact = json.replace(
+      /"embedding": \[\s*([^\]]+?)\s*\]/g,
+      (_, content) => {
+        return `"embedding": [${content.replace(/\s+/g, " ")}]`
+      }
+    )
+
+    fs.writeFileSync(this.embeddingsPath, compact)
+  }
+
+  private getEmbedding(id: string): number[] {
+    const embeddings = this.readEmbeddings()
+    return embeddings[id] || []
+  }
+
+  private setEmbedding(id: string, vector: number[]) {
+    const embeddings = this.readEmbeddings()
+    embeddings[id] = vector
+    this.writeEmbeddings(embeddings)
+  }
 
   // -----------------------
   // Internal helpers
@@ -27,12 +85,13 @@ export class JsonMemoryService implements Memory {
 
     try {
       const raw = JSON.parse(fs.readFileSync(this.filePath, "utf-8"))
+      const embeddings = this.readEmbeddings()
+
       return raw.map((e: any) => ({
-        ...e,
+        id: e.id,
+        content: e.content,
         createdAt: new Date(e.createdAt),
-        embedding: Array.isArray(e.embedding)
-          ? e.embedding.map((v: number) => +v)
-          : []
+        embedding: embeddings[e.id] || []
       }))
     } catch {
       return []
@@ -42,17 +101,14 @@ export class JsonMemoryService implements Memory {
   private write(entries: Entry[]) {
     fs.mkdirSync(path.dirname(this.filePath), { recursive: true })
 
-    const json = JSON.stringify(entries, null, 2)
+    const entriesWithoutEmbedding = entries.map(e => ({
+      id: e.id,
+      content: e.content,
+      createdAt: e.createdAt.toISOString()
+    }))
 
-    // схлопываем embedding в одну строку
-    const compact = json.replace(
-      /"embedding": \[\s*([^\]]+?)\s*\]/g,
-      (_, content) => {
-        return `"embedding": [${content.replace(/\s+/g, " ")}]`
-      }
-    )
-
-    fs.writeFileSync(this.filePath, compact)
+    const json = JSON.stringify(entriesWithoutEmbedding, null, 2)
+    fs.writeFileSync(this.filePath, json)
   }
 
   private readReflections(): Reflection[] {
@@ -141,6 +197,11 @@ export class JsonMemoryService implements Memory {
 
   async storeEntry(entry: Entry): Promise<void> {
     const entries = this.read()
+
+    if (entry.embedding?.length) {
+      this.setEmbedding(entry.id, entry.embedding)
+    }
+
     entries.push(entry)
     this.write(entries)
   }
