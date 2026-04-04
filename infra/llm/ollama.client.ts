@@ -15,7 +15,7 @@ export class OllamaClient {
   async generate(prompt: string): Promise<string> {
     try {
       const res = await this.client.chat({
-        model: process.env.OLLAMA_MODEL || "gpt-oss:120b",
+        model: process.env.OLLAMA_MODEL || "minimax-m2.7:cloud",
         messages: [
           { role: "user", content: prompt }
         ]
@@ -37,7 +37,7 @@ export class OllamaClient {
       })
 
       // Лог для диагностики (можно убрать позже)
-      console.log("RAW EMBED RESPONSE:", res)
+      console.log("RAW EMBED RESPONSE: (Ollama)", res)
 
       // Поддержка разных форматов ответа
       if (res.embedding && Array.isArray(res.embedding)) {
