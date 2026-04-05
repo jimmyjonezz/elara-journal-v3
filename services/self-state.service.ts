@@ -36,7 +36,7 @@ export function updateState(
       ...(prev.themes || []).map(normalize),
       ...(reflection.themes || []).map(normalize)
     ])
-  ).slice(0, 5)
+  ).slice(-5)
 
   // --- Insights (новое) ---
   const insights = Array.from(
