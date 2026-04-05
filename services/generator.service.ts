@@ -21,45 +21,18 @@ export class AIGenerator implements Generator {
     const issues = reflections.flatMap(r => r?.issues ?? [])
     const improvements = reflections.flatMap(r => r?.improvements ?? [])
 
-    const basePrompt = (await this.prompts.getPrompt("generation")).template
+    const template = (await this.prompts.getPrompt("generation")).template
 
-    const avoidBlock = issues.length
-      ? `Avoid:\n${issues.join("\n")}`
-      : ""
-
-    const improveBlock = improvements.length
-      ? `Improve:\n${improvements.join("\n")}`
-      : ""
-
-    const insightsBlock = state.insights?.length
-      ? `\n# Learned Insights\n${state.insights.join("\n")}\nDo not repeat them. Build on them.\n`
-      : ""
-
-    const prompt = `
-${basePrompt}
-
-# Internal State
-Mood: ${state.mood}
-Themes: ${state.themes.join(", ")}
-Drift: ${state.drift}
-Confidence: ${state.confidence}
-
-${insightsBlock}
-
-# Context
-Recent entries:
-${recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n")}
-
-# Constraints
-- Do not repeat structure or phrasing
-- High drift → change structure significantly
-
-${avoidBlock}
-${improveBlock}
-
-# Task
-Write the next journal entry.
-`
+    const prompt = template
+      .replace("{{mood}}", state.mood)
+      .replace("{{themes}}", state.themes.join(", "))
+      .replace("{{drift}}", String(state.drift))
+      .replace("{{confidence}}", String(state.confidence))
+      .replace("{{knownThemes}}", state.themes.join(", "))
+      .replace("{{insights}}", state.insights?.join("\n") || "")
+      .replace("{{recentEntries}}", recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n"))
+      .replace("{{avoid}}", issues.join("\n"))
+      .replace("{{improve}}", improvements.join("\n"))
 
     const content = await this.llm.generate(prompt)
 
