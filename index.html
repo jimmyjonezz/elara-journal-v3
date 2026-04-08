@@ -64,11 +64,12 @@
       margin-bottom: 10px;
     }
 
-    .insight {
+    .insight-item {
       color: #aaa;
       font-size: 15px;
       padding-left: 15px;
       border-left: 2px solid #444;
+      margin-bottom: 10px;
     }
 
     .state-row {
@@ -132,12 +133,14 @@
     function renderReflection(refl) {
       const container = document.getElementById("reflection")
       
-      const insight = (refl.newInsights || [])[0] || "—"
+      const insights = refl.newInsights || []
 
       container.innerHTML = `
         <h2>Рефлексия</h2>
         <div class="score">Оценка: ${refl.score || "-"}/10</div>
-        <div class="insight">→ ${insight}</div>
+        <div class="insights">
+          ${insights.map(i => `<div class="insight-item">→ ${i}</div>`).join("")}
+        </div>
       `
     }
 
