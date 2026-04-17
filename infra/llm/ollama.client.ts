@@ -22,7 +22,7 @@ export class OllamaClient {
   ): Promise<string> {
     try {
       const res: ChatResponse = await this.client.chat({
-        model: process.env.OLLAMA_MODEL || "qwen3.5", // ← Рекомендуемая модель
+        model: process.env.OLLAMA_MODEL || "qwen3.5:9b", // ← Рекомендуемая модель
         messages: [
           ...(options?.system ? [{ role: "system", content: options.system }] : []),
           { role: "user", content: prompt }
@@ -54,7 +54,7 @@ export class OllamaClient {
       // ✅ Используем "input" вместо "prompt"
       const res = await this.client.embeddings({
         model: "nomic-embed-text-v2-moe", // или "bge-m3", "mxbai-embed-large"
-        prompt: text
+        input: text
       })
 
       console.log("EMBED RESPONSE:", { 
