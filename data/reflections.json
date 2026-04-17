@@ -111,5 +111,16 @@
     "themes": [],
     "newInsights": [],
     "createdAt": "2026-04-17T13:41:18.437Z"
+  },
+  {
+    "id": "2424d15d-ee13-4590-86ac-f54436a2b1bf",
+    "entryId": "0676422a-4675-4ea9-a48c-85f757e229b9",
+    "analysis": "[Fallback: Ollama unavailable]",
+    "score": 5,
+    "issues": [],
+    "improvements": [],
+    "themes": [],
+    "newInsights": [],
+    "createdAt": "2026-04-17T13:47:45.289Z"
   }
 ]
