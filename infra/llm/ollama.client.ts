@@ -1,4 +1,4 @@
-import { Ollama } from "ollama"
+import { Ollama, ChatResponse } from "ollama"
 
 export class OllamaClient {
   private client: Ollama
@@ -12,13 +12,32 @@ export class OllamaClient {
     })
   }
 
-  async generate(prompt: string): Promise<string> {
+  async generate(
+    prompt: string, 
+    options?: {
+      system?: string;      // Системный промпт для стиля
+      temperature?: number; // Креативность
+      maxTokens?: number;   // Лимит ответа
+    }
+  ): Promise<string> {
     try {
-      const res = await this.client.chat({
-        model: process.env.OLLAMA_MODEL || "minimax-m2.7:cloud",
+      const res: ChatResponse = await this.client.chat({
+        model: process.env.OLLAMA_MODEL || "qwen2.5:14b", // ← Рекомендуемая модель
         messages: [
+          ...(options?.system ? [{ role: "system", content: options.system }] : []),
           { role: "user", content: prompt }
-        ]
+        ],
+        options: {
+          temperature: options?.temperature ?? 0.75,
+          top_p: 0.9,
+          top_k: 40,
+          repeat_penalty: 1.1,
+          presence_penalty: 0.3,
+          frequency_penalty: 0.3,
+          num_ctx: 8192,
+          num_predict: options?.maxTokens ?? 2048,
+          seed: -1
+        }
       })
 
       return res.message?.content || "Empty response"
@@ -31,24 +50,23 @@ export class OllamaClient {
 
   async embed(text: string): Promise<number[]> {
     try {
-      const res: any = await this.client.embeddings({
-        model: "ollama pull nomic-embed-text-v2-moe",
-        prompt: text
+      // ✅ Правильное имя модели (без "ollama pull")
+      // ✅ Используем "input" вместо "prompt"
+      const res = await this.client.embeddings({
+        model: "nomic-embed-text-v2-moe", // или "bge-m3", "mxbai-embed-large"
+        input: text
       })
 
-      // Лог для диагностики (можно убрать позже)
-      console.log("RAW EMBED RESPONSE: (Ollama)", res)
+      console.log("EMBED RESPONSE:", { 
+        dims: res.embedding?.length, 
+        sample: res.embedding?.slice(0, 5) 
+      })
 
-      // Поддержка разных форматов ответа
-      if (res.embedding && Array.isArray(res.embedding)) {
-        return res.embedding
+      if (!res.embedding || !Array.isArray(res.embedding)) {
+        throw new Error("Invalid embedding response format")
       }
 
-      if (res.embeddings && Array.isArray(res.embeddings) && res.embeddings.length > 0) {
-        return res.embeddings[0]
-      }
-
-      throw new Error("Invalid embedding response format")
+      return res.embedding
 
     } catch (e: any) {
       console.error("EMBED ERROR:", e?.message || e)
