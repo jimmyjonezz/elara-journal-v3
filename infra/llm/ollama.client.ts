@@ -68,7 +68,7 @@ export class OllamaClient {
       try {
         const res: any = await this.client.embeddings({
           model: "nomic-embed-text-v2-moe",
-          input: text
+          prompt: text
         })
 
         if (res.embedding && Array.isArray(res.embedding)) {
