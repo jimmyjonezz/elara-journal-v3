@@ -59,38 +59,4 @@ export class OllamaClient {
 
     console.error("OLLAMA ERROR after retries:", lastError?.message || lastError)
     return "[Fallback: Ollama unavailable]"
-  }
-
-  async embed(text: string): Promise<number[]> {
-    let lastError: any
-
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-      try {
-        const res: any = await this.client.embeddings({
-          model: "nomic-embed-text-v2-moe",
-          input: text
-        })
-
-        if (res.embedding && Array.isArray(res.embedding)) {
-          return res.embedding
-        }
-
-        if (res.embeddings && Array.isArray(res.embeddings) && res.embeddings.length > 0) {
-          return res.embeddings[0]
-        }
-
-        throw new Error("Invalid embedding response format")
-
-      } catch (e: any) {
-        lastError = e
-        if (attempt < this.maxRetries) {
-          console.warn(`EMBED attempt ${attempt} failed, retrying...`)
-          await new Promise(resolve => setTimeout(resolve, this.retryDelay))
-        }
-      }
-    }
-
-    console.error("EMBED ERROR after retries:", lastError?.message || lastError)
-    throw lastError || new Error("Embedding failed")
-  }
 }
