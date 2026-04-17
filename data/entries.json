@@ -18,5 +18,10 @@
     "id": "3bc3eb88-4ff9-43a0-a0ad-b8d75ba22921",
     "content": "Empty response",
     "createdAt": "2026-04-17T18:16:28.570Z"
+  },
+  {
+    "id": "a3c5e09f-8df9-4289-9eab-568105faa31a",
+    "content": "[Fallback: Ollama unavailable]",
+    "createdAt": "2026-04-17T18:28:21.025Z"
   }
 ]
