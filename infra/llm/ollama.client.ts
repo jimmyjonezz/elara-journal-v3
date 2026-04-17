@@ -44,7 +44,17 @@ export class OllamaClient {
           }
         })
 
-        return res.message?.content || "Empty response"
+        const content = res.message?.content
+        if (!content || content.trim() === "") {
+          console.warn(`OLLAMA attempt ${attempt}: empty response, retrying in ${this.retryDelay}ms...`)
+          if (attempt < this.maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, this.retryDelay))
+            continue
+          }
+          return "[Fallback: Ollama unavailable]"
+        }
+
+        return content
 
       } catch (e: any) {
         lastError = e
