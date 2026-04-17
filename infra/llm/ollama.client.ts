@@ -22,7 +22,7 @@ export class OllamaClient {
   ): Promise<string> {
     try {
       const res: ChatResponse = await this.client.chat({
-        model: process.env.OLLAMA_MODEL || "qwen2.5:14b", // ← Рекомендуемая модель
+        model: process.env.OLLAMA_MODEL || "qwen3.5", // ← Рекомендуемая модель
         messages: [
           ...(options?.system ? [{ role: "system", content: options.system }] : []),
           { role: "user", content: prompt }
