@@ -54,7 +54,7 @@ export class OllamaClient {
       // ✅ Используем "input" вместо "prompt"
       const res = await this.client.embeddings({
         model: "nomic-embed-text-v2-moe", // или "bge-m3", "mxbai-embed-large"
-        input: text
+        prompt: text
       })
 
       console.log("EMBED RESPONSE:", { 
