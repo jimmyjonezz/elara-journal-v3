@@ -5,7 +5,7 @@ export class OllamaClient {
 
   constructor() {
     this.client = new Ollama({
-      host: "https://api.ollama.com",
+      host: "https://ollama.com",
       headers: {
         Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`
       }
