@@ -33,10 +33,10 @@ export class OllamaClient {
             { role: "user", content: prompt }
           ],
           options: {
-            temperature: options?.temperature ?? 0.7,
-            top_p: 0.9,
-            top_k: 40,
-            repeat_penalty: 1.1,
+            temperature: options?.temperature ?? 0.8,
+            top_p: 0.85,
+            top_k: 60,
+            repeat_penalty: 1.05,
             presence_penalty: 0.0,
             frequency_penalty: 0.0,
             num_ctx: 8192,
