@@ -19,7 +19,7 @@ Elara — это замкнутый когнитивный цикл:
 
 ## Архитектура
 
-### Основной orchestrator
+### Ядро
 
 * **JournalEngine** — управляет полным циклом выполнения
 
@@ -27,12 +27,18 @@ Elara — это замкнутый когнитивный цикл:
 
 ### Компоненты
 
-* **Generator** — генерирует записи (через LLM, Ollama)
-* **Reflector** — анализирует запись (LLM)
-* **Evaluator** — проверяет валидность результата
-* **Memory** — хранение и извлечение данных
-* **EmbeddingService** — построение векторов (Voyage)
-* **Publisher** — вывод результата
+* **AIGenerator** — генерирует записи (через LLM)
+* **AIReflector** — анализирует запись (LLM)
+* **SimpleEvaluator** — проверяет валидность результата
+* **JsonMemoryService** — хранение и извлечение данных
+* **VoyageEmbeddingService** — построение векторов
+* **ConsolePublisher** — вывод результата
+* **FilePromptManager** — управление промптами
+
+### Клиенты LLM
+
+* **OllamaClient** — локальный LLM
+* **VoyageClient** — эмбеддинги ( Voyage AI)
 
 ---
 
@@ -116,12 +122,18 @@ data/
   entries.json
   reflections.json
   self-state.json
+  embeddings.json
+
+prompts/
+  generation.txt
+  reflection.txt
 ```
 
 Особенности:
 
 * embeddings сжимаются (`toFixed(3)`)
 * используется cosine similarity для поиска
+* normalize_embedding в `utils/embedding.utils.ts`
 
 ---
 
