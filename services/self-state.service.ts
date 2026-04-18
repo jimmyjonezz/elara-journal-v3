@@ -19,13 +19,16 @@ export function updateState(
     ? Math.min(1, prev.drift + 0.15)
     : prev.drift * 0.97
 
-  // --- Confidence ---
-  const score = reflection.score ?? 0.5
+  // --- Confidence (EMA with drift penalty) ---
+  const score = reflection.score ?? 5
 
-  const confidenceDelta = (score - 0.5) * 0.2
+  const baseScore = score / 10
+  const driftPenalty = prev.drift * 0.15
+  const smoothing = 0.25
+
   const confidence = Math.max(
     0,
-    Math.min(1, prev.confidence + confidenceDelta)
+    Math.min(1, prev.confidence * (1 - smoothing) + (baseScore - driftPenalty) * smoothing)
   )
 
   // --- Themes ---
@@ -49,11 +52,11 @@ export function updateState(
   // --- Mood ---
   let mood: SelfState["mood"]
 
-  if (drift > 0.7) {
+  if (drift > 0.5) {
     mood = "calm"
-  } else if (confidence > 0.75) {
+  } else if (confidence > 0.6 && drift < 0.2) {
     mood = "curious"
-  } else if (score < 0.4) {
+  } else if (score <= 4) {
     mood = "gentle"
   } else {
     mood = "reflective"
