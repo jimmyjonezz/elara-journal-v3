@@ -157,5 +157,16 @@
       "Технический сбой может быть ошибочно воспринят как смысловое сообщение"
     ],
     "createdAt": "2026-04-17T18:29:07.202Z"
+  },
+  {
+    "id": "5f89129c-c1b6-4697-9835-e147026ed84c",
+    "entryId": "7fd894b4-b92a-4131-af6d-922f03ad2bef",
+    "analysis": "[Fallback: Ollama unavailable]",
+    "score": 5,
+    "issues": [],
+    "improvements": [],
+    "themes": [],
+    "newInsights": [],
+    "createdAt": "2026-04-18T02:50:40.876Z"
   }
 ]
