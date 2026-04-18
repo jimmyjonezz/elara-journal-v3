@@ -15,7 +15,7 @@ export class OllamaClient {
   async generate(prompt: string): Promise<string> {
     try {
       const res = await this.client.chat({
-        model: process.env.OLLAMA_MODEL || "qwen 3.5:cloud",
+        model: process.env.OLLAMA_MODEL || "qwen3.5:cloud",
         messages: [
           { role: "user", content: prompt }
         ]
