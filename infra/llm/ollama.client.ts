@@ -18,7 +18,13 @@ export class OllamaClient {
         model: process.env.OLLAMA_MODEL || "qwen3.5:cloud",
         messages: [
           { role: "user", content: prompt }
-        ]
+        ],
+        options: {
+          temperature: 0.85,
+          repeat_penalty: 1.1,
+          top_p: 0.85,
+          top_k: 40
+        }
       })
 
       return res.message?.content || "Empty response"
