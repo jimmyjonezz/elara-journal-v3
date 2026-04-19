@@ -87,29 +87,5 @@
       "Трескающийся гель подразумевает принудительное пробуждение из крио- или регенерационного сна до завершения цикла"
     ],
     "createdAt": "2026-04-19T13:40:30.122Z"
-  },
-  {
-    "id": "16d2d341-ab8a-420c-a139-65b49d8605e8",
-    "entryId": "4b96a726-fd09-4cbe-8768-7ff53ff1381c",
-    "analysis": "[Fallback: Ollama unavailable]",
-    "score": 5,
-    "repetitionScore": 5,
-    "issues": [],
-    "improvements": [],
-    "themes": [],
-    "newInsights": [],
-    "createdAt": "2026-04-19T14:51:07.515Z"
-  },
-  {
-    "id": "914e9d10-73fe-4615-90bf-c89017b8335b",
-    "entryId": "45f4e8b6-e962-4971-84b8-f608eb886902",
-    "analysis": "[Fallback: Ollama unavailable]",
-    "score": 5,
-    "repetitionScore": 5,
-    "issues": [],
-    "improvements": [],
-    "themes": [],
-    "newInsights": [],
-    "createdAt": "2026-04-19T15:00:52.865Z"
   }
 ]
