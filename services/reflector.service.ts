@@ -15,6 +15,7 @@ export class AIReflector implements Reflector {
 Верни JSON:
 {
   "score": оценка от 0 до 10,
+  "repetitionScore": оценка повтора от 0 до 10 (0 = полностью новая, 10 = копия),
   "issues": ["список выявленных проблем и недостатков"],
   "improvements": ["список конкретных рекомендаций по улучшению"],
   "themes": ["список ключевых тем и мотивов записи"],
@@ -24,6 +25,7 @@ export class AIReflector implements Reflector {
 ВАЖНО:
 - Возвращай только JSON
 - newInsights должны содержать только новые наблюдения, не повторяй очевидные вещи
+- repetitionScore: сравнивай с предыдущими записями (те же темы? ощущения? действия?)
 
 Запись:
 ${entry.content}
@@ -41,6 +43,7 @@ ${entry.content}
         analysis: raw,
 
         score: parsed.score ?? 5,
+        repetitionScore: parsed.repetitionScore ?? 5,
 
         issues: parsed.issues ?? [],
         improvements: parsed.improvements ?? [],
@@ -57,6 +60,7 @@ ${entry.content}
         analysis: raw,
 
         score: 5,
+        repetitionScore: 5,
 
         issues: [],
         improvements: [],

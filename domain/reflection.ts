@@ -6,6 +6,7 @@ export interface Reflection {
   analysis: string
 
   score: number
+  repetitionScore: number
 
   issues: string[]
   improvements: string[]
