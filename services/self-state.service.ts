@@ -8,16 +8,21 @@ export function updateState(
   reflection: Reflection
 ): SelfState {
 
-  // --- Drift ---
-  const repetitionSignals = ["repetition", "similar", "redundant"]
+  // --- Drift (hybrid approach) ---
+  // 1. LLM-based repetition score (0-10)
+  const repetitionScore = reflection.repetitionScore ?? 5
 
-  const hasRepetition = reflection.issues?.some(issue =>
-    repetitionSignals.some(signal => issue.toLowerCase().includes(signal))
-  )
+  // 2. Theme repeat ratio (0-1)
+  const prevThemes = (prev.themes || []).map(t => t.toLowerCase().trim())
+  const newThemes = (reflection.themes || []).map(t => t.toLowerCase().trim())
+  const themeRepeats = newThemes.filter(t => prevThemes.includes(t)).length
+  const themeRepeatRatio = prevThemes.length > 0 ? themeRepeats / prevThemes.length : 0
 
-  const drift = hasRepetition
-    ? Math.min(1, prev.drift + 0.15)
-    : prev.drift * 0.97
+  // 3. Combine signals: LLM score (60%) + theme ratio (40%)
+  const repetitionSignal = (repetitionScore / 10) * 0.6 + themeRepeatRatio * 0.4
+
+  // 4. Growth with decay
+  const drift = Math.min(1, prev.drift * 0.97 + repetitionSignal * 0.15)
 
   // --- Confidence (EMA with drift penalty) ---
   const score = reflection.score ?? 5
