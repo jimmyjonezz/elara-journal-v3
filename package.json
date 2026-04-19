@@ -11,8 +11,8 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.19.39",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.0",
-    "@types/node": "^20.19.0"
+    "typescript": "^5.9.0"
   }
 }
