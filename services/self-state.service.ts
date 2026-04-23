@@ -36,15 +36,13 @@ export function updateState(
     Math.min(1, prev.confidence * (1 - smoothing) + (baseScore - driftPenalty) * smoothing)
   )
 
-  // --- Themes ---
-  const normalize = (t: string) => t.toLowerCase().trim()
-
+  // --- Themes (накопление из reflection.themes) ---
   const themes = Array.from(
     new Set([
-      ...(prev.themes || []).map(normalize),
-      ...(reflection.themes || []).map(normalize)
+      ...(prev.themes || []),
+      ...(reflection.themes || [])
     ])
-  ).slice(-5)
+  ).slice(-10)
 
   // --- Insights (новое) ---
   const insights = Array.from(

@@ -21,14 +21,21 @@ export class AIGenerator implements Generator {
     const issues = reflections.flatMap(r => r?.issues ?? [])
     const improvements = reflections.flatMap(r => r?.improvements ?? [])
 
+    // Themes: последние из последнего reflection
+    const lastReflection = reflections[0]
+    const currentThemes = lastReflection?.themes?.join("\n") || state.themes.join(", ")
+
+    // Known Themes: из self-state (прошлые)
+    const knownThemes = state.themes.join(", ")
+
     const template = (await this.prompts.getPrompt("generation")).template
 
     const prompt = template
       .replace("{{mood}}", state.mood)
-      .replace("{{themes}}", state.themes.join(", "))
+      .replace("{{themes}}", currentThemes)
       .replace("{{drift}}", String(state.drift))
       .replace("{{confidence}}", String(state.confidence))
-      .replace("{{knownThemes}}", state.themes.join(", "))
+      .replace("{{knownThemes}}", knownThemes)
       .replace("{{insights}}", state.insights?.join("\n") || "")
       .replace("{{recentEntries}}", recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n"))
       .replace("{{avoid}}", issues.join("\n"))
