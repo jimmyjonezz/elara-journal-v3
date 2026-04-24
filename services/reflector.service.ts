@@ -9,27 +9,13 @@ export class AIReflector implements Reflector {
   constructor(private llm: any, private prompts: any) {}
 
   async reflect(entry: any, context: any): Promise<Reflection> {
-    const prompt = `
-Проанализируй эту дневниковую запись.
+    const previousThemes = context?.state?.themes?.join("\n") || "(нет предыдущих тем)"
 
-Верни JSON:
-{
-  "score": оценка от 0 до 10,
-  "repetitionScore": оценка повтора от 0 до 10 (0 = полностью новая, 10 = копия),
-  "issues": ["список выявленных проблем и недостатков"],
-  "improvements": ["список конкретных рекомендаций по улучшению"],
-  "themes": ["список ключевых тем и мотивов записи"],
-  "newInsights": ["новые выводы, которые ранее не были очевидны"]
-}
+    const template = (await this.prompts.getPrompt("reflection")).template
 
-ВАЖНО:
-- Возвращай только JSON
-- newInsights должны содержать только новые наблюдения, не повторяй очевидные вещи
-- repetitionScore: сравнивай с предыдущими записями (те же темы? ощущения? действия?)
-
-Запись:
-${entry.content}
-`
+    const prompt = template
+      .replace("<entry>", entry.content)
+      .replace("{{themes}}", previousThemes)
 
     const raw = await this.llm.generate(prompt)
 
