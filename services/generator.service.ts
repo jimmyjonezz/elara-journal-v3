@@ -18,15 +18,35 @@ export class AIGenerator implements Generator {
   ): Promise<Entry> {
     const { recentEntries, semanticMatches, state, reflections } = context
 
-    const issues = reflections.flatMap(r => r?.issues ?? [])
-    const improvements = reflections.flatMap(r => r?.improvements ?? [])
+    const lastReflection = reflections[0]
 
     // Themes: последние из последнего reflection
-    const lastReflection = reflections[0]
-    const currentThemes = lastReflection?.themes?.join("\n") || state.themes.join(", ")
+    const currentThemesArr = lastReflection?.themes ?? []
+    const currentThemes = currentThemesArr.join("\n") || state.themes.join("\n")
 
-    // Known Themes: из self-state (прошлые)
-    const knownThemes = state.themes.join(", ")
+    // Known Themes: из self-state (прошлые), без дублирования текущих, макс 2
+    const knownThemes = state.themes
+      .filter(t => !currentThemesArr.includes(t))
+      .slice(0, 2)
+      .join("\n")
+
+    // Insights: последние 2 из self-state
+    const insights = (state.insights ?? []).slice(-2).join("\n")
+
+    // Dynamic Avoid: макс 2 актуальных из последнего reflection
+    const avoid = (lastReflection?.issues ?? []).slice(-2).join("\n")
+
+    // Dynamic Improve: макс 2 актуальных из последнего reflection
+    const improve = (lastReflection?.improvements ?? []).slice(-2).join("\n")
+
+    // Recent Entries: только последний абзац предыдущей записи
+    const lastEntry = recentEntries[0]?.content ?? ""
+    const lastParagraph = lastEntry.split("\n\n").pop() ?? ""
+
+    // Narrative Vector: systemTension из state или fallback из последнего абзаца
+    const narrativeVector = (state.systemTension?.[0])
+      ?? (lastReflection?.systemTension?.[0])
+      ?? lastParagraph.split(".").pop()?.trim() ?? ""
 
     const template = (await this.prompts.getPrompt("generation")).template
 
@@ -36,10 +56,11 @@ export class AIGenerator implements Generator {
       .replace("{{drift}}", String(state.drift))
       .replace("{{confidence}}", String(state.confidence))
       .replace("{{knownThemes}}", knownThemes)
-      .replace("{{insights}}", state.insights?.join("\n") || "")
-      .replace("{{recentEntries}}", recentEntries.map(e => e.content.slice(0, 200)).join("\n---\n"))
-      .replace("{{avoid}}", issues.join("\n"))
-      .replace("{{improve}}", improvements.join("\n"))
+      .replace("{{insights}}", insights)
+      .replace("{{recentEntries}}", lastParagraph)
+      .replace("{{avoid}}", avoid)
+      .replace("{{improve}}", improve)
+      .replace("{{narrativeVector}}", narrativeVector)
 
     const content = await this.llm.generate(prompt)
 

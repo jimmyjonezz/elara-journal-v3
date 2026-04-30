@@ -50,7 +50,15 @@ export function updateState(
       ...(prev.insights || []),
       ...(reflection.newInsights || [])
     ])
-  ).slice(0, 10)
+  ).slice(-10)
+
+  // --- System Tension (из reflection.systemTension, макс 3) ---
+  const systemTension = Array.from(
+    new Set([
+      ...(prev.systemTension || []),
+      ...(reflection.systemTension || [])
+    ])
+  ).slice(-3)
 
   // --- Mood ---
   let mood: SelfState["mood"]
@@ -69,6 +77,7 @@ export function updateState(
     mood,
     themes,
     insights,
+    systemTension,
     drift,
     confidence
   }

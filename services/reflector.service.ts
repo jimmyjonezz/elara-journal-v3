@@ -35,6 +35,7 @@ export class AIReflector implements Reflector {
         improvements: parsed.improvements ?? [],
         themes: parsed.themes ?? [],
         newInsights: parsed.newInsights ?? [],
+        systemTension: parsed.systemTension ?? [],
 
         createdAt: new Date()
       }
@@ -52,6 +53,7 @@ export class AIReflector implements Reflector {
         improvements: [],
         themes: [],
         newInsights: [],
+        systemTension: [],
 
         createdAt: new Date()
       }

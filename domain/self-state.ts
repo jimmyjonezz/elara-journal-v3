@@ -5,8 +5,9 @@ export interface SelfState {
 
   themes: string[]
 
-  // ✅ новое поле
   insights: string[]
+
+  systemTension: string[]
 
   drift: number
   confidence: number
