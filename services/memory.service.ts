@@ -139,7 +139,8 @@ export class JsonMemoryService implements Memory {
       const initial: SelfState = {
         mood: "calm",
         themes: [],
-        insights: [], // ✅ добавлено
+        insights: [],
+        systemTension: [],
         drift: 0.3,
         confidence: 0.5
       }
@@ -156,7 +157,8 @@ export class JsonMemoryService implements Memory {
       return {
         mood: raw.mood || "calm",
         themes: raw.themes || [],
-        insights: raw.insights || [], // ✅ добавлено
+        insights: raw.insights || [],
+        systemTension: raw.systemTension || [],
         drift: raw.drift ?? 0.3,
         confidence: raw.confidence ?? 0.5
       }
@@ -165,7 +167,8 @@ export class JsonMemoryService implements Memory {
       return {
         mood: "calm",
         themes: [],
-        insights: [], // ✅ добавлено
+        insights: [],
+        systemTension: [],
         drift: 0.3,
         confidence: 0.5
       }

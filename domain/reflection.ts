@@ -15,5 +15,8 @@ export interface Reflection {
   // ✅ новое поле
   newInsights: string[]
 
+  // ✅ системное напряжение
+  systemTension: string[]
+
   createdAt: Date
 }
