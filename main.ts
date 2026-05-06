@@ -8,7 +8,7 @@ import { AIReflector } from "./services/reflector.service"
 import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 
-import { OllamaClient } from "./infra/llm/ollama.client"
+import { OpenCodeClient } from "./infra/llm/opencode.client"
 import { VoyageClient } from "./infra/llm/voyage.client"
 import { VoyageEmbeddingService } from "./services/embedding.service"
 
@@ -16,7 +16,7 @@ import { FilePromptManager } from "./services/prompt.service"
 
 async function main() {
   // --- LLM ---
-  const llm = new OllamaClient()
+  const llm = new OpenCodeClient()
 
   // --- Prompts ---
   const prompts = new FilePromptManager()
@@ -52,3 +52,4 @@ async function main() {
 main().catch(err => {
   console.error("Fatal error:", err)
 })
+
