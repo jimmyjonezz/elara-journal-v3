@@ -1,6 +1,7 @@
 import OpenAI from "openai"
+import { LLMClient } from "../../interfaces/llm"
 
-export class OpenCodeClient {
+export class OpenCodeClient implements LLMClient {
   private client: OpenAI
 
   constructor() {
