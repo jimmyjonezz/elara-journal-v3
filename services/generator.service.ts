@@ -4,12 +4,12 @@ import { Generator } from "../interfaces/generator"
 import { Context } from "../domain/context"
 import { Entry } from "../domain/entry"
 import { SelfState } from "../domain/self-state"
-import { OllamaClient } from "../infra/llm/ollama.client"
+import { LLMClient } from "../interfaces/llm"
 import { FilePromptManager } from "./prompt.service"
 
 export class AIGenerator implements Generator {
   constructor(
-    private llm: OllamaClient,
+    private llm: LLMClient,
     private prompts: FilePromptManager
   ) {}
 
@@ -72,3 +72,4 @@ export class AIGenerator implements Generator {
     }
   }
 }
+

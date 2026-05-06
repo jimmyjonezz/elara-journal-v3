@@ -1,6 +1,7 @@
 import { Ollama } from "ollama"
+import { LLMClient } from "../../interfaces/llm"
 
-export class OllamaClient {
+export class OllamaClient implements LLMClient {
   private client: Ollama
 
   constructor() {
