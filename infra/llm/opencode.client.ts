@@ -14,7 +14,7 @@ export class OpenCodeClient implements LLMClient {
 
   async generate(prompt: string): Promise<string> {
     const maxRetries = 3
-    const delay = 30000
+    const baseDelay = 5000 // start at 5s, exponential backoff: 5s, 10s, 20s
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -27,7 +27,14 @@ export class OpenCodeClient implements LLMClient {
           top_p: 0.85
         })
 
-        return res.choices[0]?.message?.content || "Empty response"
+        const content = res.choices[0]?.message?.content
+
+        // Treat null / empty / whitespace-only as a retry-able failure
+        if (!content || !content.trim()) {
+          throw new Error(`Empty content from model (attempt ${attempt}/${maxRetries})`)
+        }
+
+        return content
 
       } catch (e: any) {
         const isUnauthorized = e?.status === 401 || e?.status === 403
@@ -43,6 +50,7 @@ export class OpenCodeClient implements LLMClient {
           throw new Error(`OpenCode unauthorized: ${e?.message || e}`)
         }
 
+        const delay = baseDelay * Math.pow(2, attempt - 1)
         console.log(`Retrying in ${delay / 1000}s...`)
         await new Promise(r => setTimeout(r, delay))
       }
