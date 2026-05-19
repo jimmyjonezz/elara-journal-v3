@@ -31,8 +31,8 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
       - name: Commit changes
         run: |
-          git config user.name "elara-bot"
-          git config user.email "bot@elara.ai"
+          git config user.name "jimmyjonezz"
+          git config user.email "jimmy@elara.ai"
           git add data/*.json
           git commit -m "Update journal entries" || echo "No changes"
           git push
