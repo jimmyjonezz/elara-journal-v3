@@ -19,7 +19,7 @@ export class OpenCodeClient implements LLMClient {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const res = await this.client.chat.completions.create({
-          model: process.env.OPENCODE_MODEL || "minimax-m2.5-free",
+          model: process.env.OPENCODE_MODEL || "deepseek-v4-flash-free",
           messages: [
             { role: "user", content: prompt }
           ],
