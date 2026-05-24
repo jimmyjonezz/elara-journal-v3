@@ -25,11 +25,28 @@ export class JournalEngine {
     const state = await this.memory.getSelfState()
     const reflections = await this.memory.getRecentReflections(5)
 
-    const entry = await this.generator.generate({
+    let entry = await this.generator.generate({
       ...context,
       state,
       reflections
     })
+
+    let evaluation = await this.evaluator.evaluate(entry)
+
+    for (let attempt = 1; attempt <= 2 && !evaluation.valid; attempt++) {
+      console.warn(`Retry ${attempt}:`, evaluation.issues.join("; "))
+      entry = await this.generator.generate({
+        ...context,
+        state,
+        reflections
+      })
+      evaluation = await this.evaluator.evaluate(entry)
+    }
+
+    if (!evaluation.valid) {
+      console.error("Entry rejected after all retries:", evaluation.issues.join("; "))
+      return
+    }
 
     const embeddingRaw = await this.embedding.embed(entry.content)
       
@@ -40,9 +57,6 @@ export class JournalEngine {
     entry.embedding = normalizeEmbedding(embeddingRaw)
 
     const reflection = await this.reflector.reflect(entry, context)
-    const evaluation = await this.evaluator.evaluate(entry)
-
-    if (!evaluation.valid) return
 
     const newState = updateState(state, reflection)
 

@@ -1,5 +1,8 @@
 // main.ts
 
+import * as dotenv from "dotenv"
+dotenv.config()
+
 import { JournalEngine } from "./core/journalEngine"
 
 import { JsonMemoryService } from "./services/memory.service"
@@ -10,7 +13,6 @@ import { ConsolePublisher } from "./services/publisher.service"
 
 import { OpenCodeClient } from "./infra/llm/opencode.client"
 import { VoyageClient } from "./infra/llm/voyage.client"
-import { VoyageEmbeddingService } from "./services/embedding.service"
 
 import { FilePromptManager } from "./services/prompt.service"
 
@@ -22,8 +24,7 @@ async function main() {
   const prompts = new FilePromptManager()
 
   // --- Embedding ---
-  const voyage = new VoyageClient()
-  const embedding = new VoyageEmbeddingService(voyage)
+  const embedding = new VoyageClient()
 
   // --- Memory ---
   const memory = new JsonMemoryService(embedding)

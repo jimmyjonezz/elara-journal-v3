@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "main.ts",
   "scripts": {
-    "start": "ts-node main.ts"
+    "start": "ts-node main.ts",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "dotenv": "^16.0.0",
