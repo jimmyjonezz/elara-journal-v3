@@ -25,22 +25,24 @@ export class JournalEngine {
     const state = await this.memory.getSelfState()
     const reflections = await this.memory.getRecentReflections(5)
 
-    // --- Crisis injection: если drift >= 0.7, форсируем событие ---
-    const crisisEvents = [
-      "ТРЕВОГА: система жизнеобеспечения в секторе C выдаёт ошибку — герой вынужден бежать в лабораторный модуль, игнорируя протокол безопасности",
-      "НЕОЖИДАННАЯ НАХОДКА: герой находит персональный коммуникатор Дженсена с последней голосовой заметкой за 6 минут до смерти",
-      "АВАРИЯ: лёгкое замыкание в распределительном щите сектора 2 — герой тушит и обнаруживает под панелью органическую плёнку",
-      "СИГНАЛ: дверь в отсек E герметично закрыта, но карта показывает, что за ней нет помещения — герой взламывает замок"
-    ]
+    // --- Crisis: если drift >= 0.7, форсируем продолжение последней записи ---
+    const lastEntry = context.recentEntries[0]?.content ?? ""
+    const sentences = lastEntry
+      .split(/\n\n+/)
+      .pop() ?? ""
+    const lastSentence = sentences
+      .split(/[.?!]\s*/)
+      .filter(s => s.trim().length > 0)
+      .pop() ?? ""
 
-    const crisisInjected = state.drift >= 0.7 && context.workingMemory.length > 0
+    const needsContinuation = state.drift >= 0.7 && lastSentence.length > 0
 
-    const workingMemory = crisisInjected
-      ? [crisisEvents[Math.floor(Math.random() * crisisEvents.length)], ...context.workingMemory]
+    const workingMemory = needsContinuation
+      ? [`[FORCED CONTINUATION] "${lastSentence.trim()}" — продолжи ровно с этого момента. Первое слово новой записи = прямое продолжение последнего действия.`, ...context.workingMemory]
       : context.workingMemory
 
-    if (crisisInjected) {
-      console.warn(`[CRISIS] Drift=${state.drift.toFixed(2)} — injected forced event: "${workingMemory[0]}"`)
+    if (needsContinuation) {
+      console.warn(`[CRISIS] Drift=${state.drift.toFixed(2)} — forced continuation from: "${lastSentence.trim()}"`)
     }
 
     let entry = await this.generator.generate({
