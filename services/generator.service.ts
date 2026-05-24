@@ -15,7 +15,7 @@ export class AIGenerator implements Generator {
   ) {}
 
   async generate(context: Context): Promise<Entry> {
-    const { recentEntries, semanticMatches, state, reflections } = context
+    const { recentEntries, semanticMatches, state, reflections, workingMemory } = context
 
     const lastReflection = reflections[0]
 
@@ -60,6 +60,7 @@ export class AIGenerator implements Generator {
       .replace("{{avoid}}", avoid)
       .replace("{{improve}}", improve)
       .replace("{{narrativeVector}}", narrativeVector)
+      .replace("{{workingMemory}}", workingMemory.join("\n") || "None")
 
     const content = await this.llm.generate(prompt)
 

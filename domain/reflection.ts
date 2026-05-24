@@ -18,5 +18,8 @@ export interface Reflection {
   // ✅ системное напряжение
   systemTension: string[]
 
+  // ✅ заброшенные сюжетные линии (были в истории, не получили развития)
+  abandonedThreads: string[]
+
   createdAt: Date
 }

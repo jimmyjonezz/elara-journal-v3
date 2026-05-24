@@ -9,6 +9,6 @@ export interface Context {
   recentEntries: Entry[]
   semanticMatches: Entry[]
   reflections: Reflection[]
-  workingMemory: any[]
+  workingMemory: string[]
   state: SelfState
 }
