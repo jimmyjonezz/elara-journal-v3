@@ -40,6 +40,7 @@ export class AIReflector implements Reflector {
         themes: parsed.themes ?? [],
         newInsights: parsed.newInsights ?? [],
         systemTension: parsed.systemTension ?? [],
+        abandonedThreads: parsed.abandonedThreads ?? [],
 
         createdAt: new Date()
       }
@@ -58,6 +59,7 @@ export class AIReflector implements Reflector {
         themes: [],
         newInsights: [],
         systemTension: [],
+        abandonedThreads: [],
 
         createdAt: new Date()
       }

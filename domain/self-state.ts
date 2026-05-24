@@ -9,6 +9,8 @@ export interface SelfState {
 
   systemTension: string[]
 
+  unresolvedThreads: string[]
+
   drift: number
   confidence: number
 }

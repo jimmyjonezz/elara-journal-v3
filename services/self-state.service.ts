@@ -60,6 +60,29 @@ export function updateState(
     ])
   ).slice(-3)
 
+  // --- Unresolved threads (заброшенные + текущие открытые ситуации) ---
+  const openSituation = (reflection.themes?.[1])
+    ? `${reflection.themes[1]}`
+    : null
+
+  const freshThreads = [
+    ...(openSituation ? [openSituation] : []),
+    ...(reflection.systemTension || [])
+  ]
+
+  // Abandoned threads имеют высший приоритет — ставим их первыми
+  const abandoned = reflection.abandonedThreads || []
+
+  const merged = [
+    ...abandoned,
+    ...(prev.unresolvedThreads || []),
+    ...freshThreads
+  ]
+
+  const unresolvedThreads = Array.from(
+    new Set(merged)
+  ).slice(-7)
+
   // --- Mood ---
   let mood: SelfState["mood"]
 
@@ -82,6 +105,7 @@ export function updateState(
     themes,
     insights,
     systemTension,
+    unresolvedThreads,
     drift,
     confidence
   }

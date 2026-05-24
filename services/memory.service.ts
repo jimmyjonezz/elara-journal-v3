@@ -197,6 +197,15 @@ export class JsonMemoryService implements Memory {
         themes: [],
         insights: [],
         systemTension: [],
+        unresolvedThreads: [
+          "Анализ проб (пыль, хлопья в воде, голубой налёт) в лабораторном модуле",
+          "Смерть Дженсена — его последние записи, что он делал",
+          "Нечеловеческий отпечаток пальца на тройнике",
+          "Чип E.M. Systems, 2031 — кто поставщик",
+          "Тиканье 6 Гц в стене лабораторного модуля",
+          "Гофра в отсек E — карта не совпадает с реальностью",
+          "Кристаллическая решётка на иллюминаторе"
+        ],
         drift: 0.3,
         confidence: 0.5
       }
@@ -215,6 +224,15 @@ export class JsonMemoryService implements Memory {
         themes: raw.themes || [],
         insights: raw.insights || [],
         systemTension: raw.systemTension || [],
+        unresolvedThreads: raw.unresolvedThreads || [
+          "Анализ проб (пыль, хлопья в воде, голубой налёт) в лабораторном модуле",
+          "Смерть Дженсена — его последние записи, что он делал",
+          "Нечеловеческий отпечаток пальца на тройнике",
+          "Чип E.M. Systems, 2031 — кто поставщик",
+          "Тиканье 6 Гц в стене лабораторного модуля",
+          "Гофра в отсек E — карта не совпадает с реальностью",
+          "Кристаллическая решётка на иллюминаторе"
+        ],
         drift: raw.drift ?? 0.3,
         confidence: raw.confidence ?? 0.5
       }
@@ -227,6 +245,15 @@ export class JsonMemoryService implements Memory {
         themes: [],
         insights: [],
         systemTension: [],
+        unresolvedThreads: [
+          "Анализ проб (пыль, хлопья в воде, голубой налёт) в лабораторном модуле",
+          "Смерть Дженсена — его последние записи, что он делал",
+          "Нечеловеческий отпечаток пальца на тройнике",
+          "Чип E.M. Systems, 2031 — кто поставщик",
+          "Тиканье 6 Гц в стене лабораторного модуля",
+          "Гофра в отсек E — карта не совпадает с реальностью",
+          "Кристаллическая решётка на иллюминаторе"
+        ],
         drift: 0.3,
         confidence: 0.5
       }
@@ -332,7 +359,7 @@ export class JsonMemoryService implements Memory {
       semanticMatches,
       reflections,
       state,
-      workingMemory: []
+      workingMemory: state.unresolvedThreads.slice(0, 3)
     }
   }
 }
