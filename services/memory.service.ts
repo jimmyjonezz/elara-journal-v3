@@ -17,14 +17,37 @@ export class JsonMemoryService implements Memory {
   private selfStatePath = path.resolve("data/self-state.json")
   private embeddingsPath = path.resolve("data/embeddings.json")
 
+  private cache = {
+    entries: null as Entry[] | null,
+    reflections: null as Reflection[] | null,
+    embeddings: null as Record<string, number[]> | null,
+    selfState: null as SelfState | null
+  }
+
   constructor(private embedding: EmbeddingService) {}
+
+  // -----------------------
+  // Cache helpers
+  // -----------------------
+
+  private invalidateCache() {
+    this.cache.entries = null
+    this.cache.reflections = null
+    this.cache.embeddings = null
+    this.cache.selfState = null
+  }
 
   // -----------------------
   // Embeddings
   // -----------------------
 
   private readEmbeddings(): Record<string, number[]> {
-    if (!fs.existsSync(this.embeddingsPath)) return {}
+    if (this.cache.embeddings) return this.cache.embeddings
+
+    if (!fs.existsSync(this.embeddingsPath)) {
+      this.cache.embeddings = {}
+      return this.cache.embeddings
+    }
 
     try {
       const raw = JSON.parse(fs.readFileSync(this.embeddingsPath, "utf-8"))
@@ -36,12 +59,15 @@ export class JsonMemoryService implements Memory {
             result[item.id] = item.embedding
           }
         }
+        this.cache.embeddings = result
         return result
       }
 
-      return raw as Record<string, number[]>
+      this.cache.embeddings = raw as Record<string, number[]>
+      return this.cache.embeddings
     } catch {
-      return {}
+      this.cache.embeddings = {}
+      return this.cache.embeddings
     }
   }
 
@@ -63,11 +89,7 @@ export class JsonMemoryService implements Memory {
     )
 
     fs.writeFileSync(this.embeddingsPath, compact)
-  }
-
-  private getEmbedding(id: string): number[] {
-    const embeddings = this.readEmbeddings()
-    return embeddings[id] || []
+    this.cache.embeddings = null
   }
 
   private setEmbedding(id: string, vector: number[]) {
@@ -81,19 +103,28 @@ export class JsonMemoryService implements Memory {
   // -----------------------
 
   private read(): Entry[] {
-    if (!fs.existsSync(this.filePath)) return []
+    if (this.cache.entries) return this.cache.entries
+
+    if (!fs.existsSync(this.filePath)) {
+      this.cache.entries = []
+      return this.cache.entries
+    }
 
     try {
       const raw = JSON.parse(fs.readFileSync(this.filePath, "utf-8"))
       const embeddings = this.readEmbeddings()
 
-      return raw.map((e: any) => ({
+      const entries: Entry[] = raw.map((e: any) => ({
         id: e.id,
         content: e.content,
         createdAt: new Date(e.createdAt),
         embedding: embeddings[e.id] || []
       }))
+
+      this.cache.entries = entries
+      return entries
     } catch {
+      this.cache.entries = []
       return []
     }
   }
@@ -109,14 +140,29 @@ export class JsonMemoryService implements Memory {
 
     const json = JSON.stringify(entriesWithoutEmbedding, null, 2)
     fs.writeFileSync(this.filePath, json)
+    this.cache.entries = null
   }
 
   private readReflections(): Reflection[] {
-    if (!fs.existsSync(this.reflectionPath)) return []
+    if (this.cache.reflections) return this.cache.reflections
+
+    if (!fs.existsSync(this.reflectionPath)) {
+      this.cache.reflections = []
+      return []
+    }
 
     try {
-      return JSON.parse(fs.readFileSync(this.reflectionPath, "utf-8"))
+      const raw = JSON.parse(fs.readFileSync(this.reflectionPath, "utf-8"))
+
+      const reflections: Reflection[] = raw.map((r: any) => ({
+        ...r,
+        createdAt: new Date(r.createdAt)
+      }))
+
+      this.cache.reflections = reflections
+      return reflections
     } catch {
+      this.cache.reflections = []
       return []
     }
   }
@@ -124,10 +170,18 @@ export class JsonMemoryService implements Memory {
   private writeReflections(reflections: Reflection[]) {
     fs.mkdirSync(path.dirname(this.reflectionPath), { recursive: true })
 
+    const serialized = reflections.map(r => ({
+      ...r,
+      createdAt: r.createdAt instanceof Date
+        ? r.createdAt.toISOString()
+        : r.createdAt
+    }))
+
     fs.writeFileSync(
       this.reflectionPath,
-      JSON.stringify(reflections, null, 2)
+      JSON.stringify(serialized, null, 2)
     )
+    this.cache.reflections = null
   }
 
   // -----------------------
@@ -135,6 +189,8 @@ export class JsonMemoryService implements Memory {
   // -----------------------
 
   async getSelfState(): Promise<SelfState> {
+    if (this.cache.selfState) return this.cache.selfState
+
     if (!fs.existsSync(this.selfStatePath)) {
       const initial: SelfState = {
         mood: "calm",
@@ -154,7 +210,7 @@ export class JsonMemoryService implements Memory {
         fs.readFileSync(this.selfStatePath, "utf-8")
       )
 
-      return {
+      this.cache.selfState = {
         mood: raw.mood || "calm",
         themes: raw.themes || [],
         insights: raw.insights || [],
@@ -163,8 +219,10 @@ export class JsonMemoryService implements Memory {
         confidence: raw.confidence ?? 0.5
       }
 
+      return this.cache.selfState
+
     } catch {
-      return {
+      this.cache.selfState = {
         mood: "calm",
         themes: [],
         insights: [],
@@ -172,6 +230,7 @@ export class JsonMemoryService implements Memory {
         drift: 0.3,
         confidence: 0.5
       }
+      return this.cache.selfState
     }
   }
 
@@ -182,6 +241,7 @@ export class JsonMemoryService implements Memory {
       this.selfStatePath,
       JSON.stringify(state, null, 2)
     )
+    this.cache.selfState = state
   }
 
   // -----------------------
@@ -195,7 +255,8 @@ export class JsonMemoryService implements Memory {
   }
 
   async getRecentReflections(limit: number): Promise<Reflection[]> {
-    return this.readReflections().slice(-limit)
+    const all = this.readReflections()
+    return all.slice(Math.max(0, all.length - limit))
   }
 
   async storeEntry(entry: Entry): Promise<void> {
@@ -219,13 +280,22 @@ export class JsonMemoryService implements Memory {
   // Semantic search
   // -----------------------
 
+  private queryCache = new Map<string, { result: Entry[]; timestamp: number }>()
+  private readonly CACHE_TTL = 60000
+
   async searchSemantic(query: string, limit: number): Promise<Entry[]> {
     const entries = this.read()
     if (!entries.length) return []
 
+    const now = Date.now()
+    const cached = this.queryCache.get(query)
+    if (cached && now - cached.timestamp < this.CACHE_TTL) {
+      return cached.result.slice(0, limit)
+    }
+
     const queryEmbedding = await this.embedding.embed(query)
 
-    return entries
+    const result = entries
       .filter(e => e.embedding?.length)
       .map(e => ({
         entry: e,
@@ -234,6 +304,10 @@ export class JsonMemoryService implements Memory {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(e => e.entry)
+
+    this.queryCache.set(query, { result, timestamp: now })
+
+    return result
   }
 
   // -----------------------

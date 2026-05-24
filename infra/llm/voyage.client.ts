@@ -1,4 +1,6 @@
-export class VoyageClient {
+import { EmbeddingService } from "../../interfaces/embedding"
+
+export class VoyageClient implements EmbeddingService {
   private apiKey = process.env.VOYAGE_API_KEY!
 
   async embed(text: string): Promise<number[]> {

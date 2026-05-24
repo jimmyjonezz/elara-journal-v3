@@ -2,13 +2,17 @@
 
 import { Reflector } from "../interfaces/reflector"
 import { Reflection } from "../domain/reflection"
+import { Entry } from "../domain/entry"
+import { Context } from "../domain/context"
+import { LLMClient } from "../interfaces/llm"
+import { PromptManager } from "../interfaces/prompt"
 import { randomUUID } from "crypto"
 import { extractJSON } from "../utils/json.utils"
 
 export class AIReflector implements Reflector {
-  constructor(private llm: any, private prompts: any) {}
+  constructor(private llm: LLMClient, private prompts: PromptManager) {}
 
-  async reflect(entry: any, context: any): Promise<Reflection> {
+  async reflect(entry: Entry, context: Context): Promise<Reflection> {
     const previousThemes = context?.state?.themes?.join("\n") || "(нет предыдущих тем)"
 
     const template = (await this.prompts.getPrompt("reflection")).template

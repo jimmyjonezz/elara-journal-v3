@@ -1,3 +1,4 @@
+// @ts-nocheck — DEPRECATED: см. infra/db/sqlite.ts
 import { db } from "./sqlite"
 import { Entry } from "../../domain/entry"
 

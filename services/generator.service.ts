@@ -1,5 +1,6 @@
 // services/generator.service.ts
 
+import { randomUUID } from "crypto"
 import { Generator } from "../interfaces/generator"
 import { Context } from "../domain/context"
 import { Entry } from "../domain/entry"
@@ -13,9 +14,7 @@ export class AIGenerator implements Generator {
     private prompts: FilePromptManager
   ) {}
 
-  async generate(
-    context: Context & { state: SelfState; reflections: any[] }
-  ): Promise<Entry> {
+  async generate(context: Context): Promise<Entry> {
     const { recentEntries, semanticMatches, state, reflections } = context
 
     const lastReflection = reflections[0]

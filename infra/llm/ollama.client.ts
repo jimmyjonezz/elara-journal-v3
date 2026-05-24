@@ -6,21 +6,18 @@ export class OllamaClient implements LLMClient {
 
   constructor() {
     this.client = new Ollama({
-      host: "https://ollama.com",
-      headers: {
-        Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`
-      }
+      host: process.env.OLLAMA_HOST || "http://localhost:11434"
     })
   }
 
   async generate(prompt: string): Promise<string> {
     const maxRetries = 3
-    const delay = 30000
+    const baseDelay = 10000
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const res = await this.client.chat({
-          model: process.env.OLLAMA_MODEL || "qwen3.5:cloud",
+          model: process.env.OLLAMA_MODEL || "llama3.2",
           messages: [
             { role: "user", content: prompt }
           ],
@@ -32,7 +29,13 @@ export class OllamaClient implements LLMClient {
           }
         })
 
-        return res.message?.content || "Empty response"
+        const content = res.message?.content
+
+        if (!content?.trim()) {
+          throw new Error(`Empty content from model (attempt ${attempt}/${maxRetries})`)
+        }
+
+        return content
 
       } catch (e: any) {
         const isUnauthorized = e?.status === 401 || e?.status === 403
@@ -48,6 +51,7 @@ export class OllamaClient implements LLMClient {
           throw new Error(`Ollama unauthorized: ${e?.message || e}`)
         }
 
+        const delay = baseDelay * Math.pow(2, attempt - 1)
         console.log(`Retrying in ${delay / 1000}s...`)
         await new Promise(r => setTimeout(r, delay))
       }
