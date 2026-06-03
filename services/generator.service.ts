@@ -15,7 +15,7 @@ export class AIGenerator implements Generator {
   ) {}
 
   async generate(context: Context): Promise<Entry> {
-    const { recentEntries, semanticMatches, state, reflections, workingMemory } = context
+    const { recentEntries, state, reflections, workingMemory } = context
 
     const lastReflection = reflections[0]
 
