@@ -100,12 +100,18 @@ export function updateState(
     mood = "reflective"
   }
 
+  // --- Narrative Phase (drift-based, только рост) ---
+  const prevPhase = prev.narrativePhase ?? 1
+  const phaseFromDrift = Math.max(1, Math.min(6, Math.round(drift * 6))) as 1 | 2 | 3 | 4 | 5 | 6
+  const narrativePhase = Math.max(prevPhase, phaseFromDrift) as 1 | 2 | 3 | 4 | 5 | 6
+
   return {
     mood,
     themes,
     insights,
     systemTension,
     unresolvedThreads,
+    narrativePhase,
     drift,
     confidence
   }

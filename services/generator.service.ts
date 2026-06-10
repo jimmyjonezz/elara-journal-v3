@@ -32,8 +32,10 @@ export class AIGenerator implements Generator {
     // Insights: последние 2 из self-state
     const insights = (state.insights ?? []).slice(-2).join("\n")
 
-    // Dynamic Avoid: макс 2 актуальных из последнего reflection
-    const avoid = (lastReflection?.issues ?? []).slice(-2).join("\n")
+    // Dynamic Avoid: истощённые мотивы + issues из рефлексии
+    const motifAvoid = context.exhaustedMotifs?.slice(0, 3).join("\n") ?? ""
+    const reflectionAvoid = (lastReflection?.issues ?? []).slice(-2).join("\n")
+    const avoid = [motifAvoid, reflectionAvoid].filter(Boolean).join("\n")
 
     // Dynamic Improve: макс 2 актуальных из последнего reflection
     const improve = (lastReflection?.improvements ?? []).slice(-2).join("\n")
@@ -49,6 +51,14 @@ export class AIGenerator implements Generator {
 
     const template = (await this.prompts.getPrompt("generation")).template
 
+    // Voice phase: извлекаем секцию для текущей фазы
+    const phase = state.narrativePhase ?? 1
+    const voiceRaw = (await this.prompts.getPrompt("voice-phases")).template
+    const phaseMatch = voiceRaw.match(
+      new RegExp(`### FASE ${phase}:.*?(?=\n### FASE |\n$)`, "s")
+    )
+    const voicePhase = phaseMatch?.[0]?.trim() ?? ""
+
     const prompt = template
       .replace("{{mood}}", state.mood)
       .replace("{{themes}}", currentThemes)
@@ -61,6 +71,7 @@ export class AIGenerator implements Generator {
       .replace("{{improve}}", improve)
       .replace("{{narrativeVector}}", narrativeVector)
       .replace("{{workingMemory}}", workingMemory.join("\n") || "None")
+      .replace("{{voicePhase}}", voicePhase)
 
     const content = await this.llm.generate(prompt)
 

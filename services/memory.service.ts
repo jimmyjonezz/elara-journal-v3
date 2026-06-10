@@ -197,6 +197,7 @@ export class JsonMemoryService implements Memory {
         themes: [],
         insights: [],
         systemTension: [],
+        narrativePhase: 1,
         unresolvedThreads: [
           "Анализ проб (пыль, хлопья в воде, голубой налёт) в лабораторном модуле",
           "Смерть Дженсена — его последние записи, что он делал",
@@ -204,7 +205,10 @@ export class JsonMemoryService implements Memory {
           "Чип E.M. Systems, 2031 — кто поставщик",
           "Тиканье 6 Гц в стене лабораторного модуля",
           "Гофра в отсек E — карта не совпадает с реальностью",
-          "Кристаллическая решётка на иллюминаторе"
+          "Кристаллическая решётка на иллюминаторе",
+          "Кто такой оператор 001? — нейросеть адаптирована к нему",
+          "Женщина и мальчик на фото — пароль 'день её смерти 1303'",
+          "Бирка рейса 2032 — Соловьёв не мог быть на Земле в 2032"
         ],
         drift: 0.3,
         confidence: 0.5
@@ -224,6 +228,7 @@ export class JsonMemoryService implements Memory {
         themes: raw.themes || [],
         insights: raw.insights || [],
         systemTension: raw.systemTension || [],
+        narrativePhase: raw.narrativePhase ?? 1,
         unresolvedThreads: raw.unresolvedThreads || [
           "Анализ проб (пыль, хлопья в воде, голубой налёт) в лабораторном модуле",
           "Смерть Дженсена — его последние записи, что он делал",
@@ -231,7 +236,10 @@ export class JsonMemoryService implements Memory {
           "Чип E.M. Systems, 2031 — кто поставщик",
           "Тиканье 6 Гц в стене лабораторного модуля",
           "Гофра в отсек E — карта не совпадает с реальностью",
-          "Кристаллическая решётка на иллюминаторе"
+          "Кристаллическая решётка на иллюминаторе",
+          "Кто такой оператор 001? — нейросеть адаптирована к нему",
+          "Женщина и мальчик на фото — пароль 'день её смерти 1303'",
+          "Бирка рейса 2032 — Соловьёв не мог быть на Земле в 2032"
         ],
         drift: raw.drift ?? 0.3,
         confidence: raw.confidence ?? 0.5
@@ -245,6 +253,7 @@ export class JsonMemoryService implements Memory {
         themes: [],
         insights: [],
         systemTension: [],
+        narrativePhase: 1,
         unresolvedThreads: [
           "Анализ проб (пыль, хлопья в воде, голубой налёт) в лабораторном модуле",
           "Смерть Дженсена — его последние записи, что он делал",
@@ -252,7 +261,10 @@ export class JsonMemoryService implements Memory {
           "Чип E.M. Systems, 2031 — кто поставщик",
           "Тиканье 6 Гц в стене лабораторного модуля",
           "Гофра в отсек E — карта не совпадает с реальностью",
-          "Кристаллическая решётка на иллюминаторе"
+          "Кристаллическая решётка на иллюминаторе",
+          "Кто такой оператор 001? — нейросеть адаптирована к нему",
+          "Женщина и мальчик на фото — пароль 'день её смерти 1303'",
+          "Бирка рейса 2032 — Соловьёв не мог быть на Земле в 2032"
         ],
         drift: 0.3,
         confidence: 0.5
@@ -359,7 +371,8 @@ export class JsonMemoryService implements Memory {
       semanticMatches,
       reflections,
       state,
-      workingMemory: state.unresolvedThreads.slice(0, 3)
+      workingMemory: state.unresolvedThreads.slice(0, 3),
+      exhaustedMotifs: []
     }
   }
 }
