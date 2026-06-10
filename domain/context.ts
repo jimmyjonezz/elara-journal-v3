@@ -11,4 +11,5 @@ export interface Context {
   reflections: Reflection[]
   workingMemory: string[]
   state: SelfState
+  exhaustedMotifs: string[]
 }

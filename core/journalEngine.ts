@@ -8,8 +8,13 @@ import { Publisher } from "../interfaces/publisher"
 import { EmbeddingService } from "../interfaces/embedding"
 import { updateState } from "../services/self-state.service"
 import { normalizeEmbedding } from "../utils/embedding.utils"
+import { checkConsequences } from "../services/evaluator.service"
+import { MotifTracker } from "../services/motif.service"
 
 export class JournalEngine {
+  private motifTracker = new MotifTracker()
+  private backfilled = false
+
   constructor(
     private memory: Memory,
     private generator: Generator,
@@ -24,6 +29,16 @@ export class JournalEngine {
 
     const state = await this.memory.getSelfState()
     const reflections = await this.memory.getRecentReflections(5)
+
+    // --- Backfill мотивов из существующих записей (один раз) ---
+    if (!this.backfilled) {
+      const allEntries = await this.memory.getRecent(1000)
+      this.motifTracker.backfill(allEntries)
+      this.backfilled = true
+    }
+
+    // --- Истощённые мотивы для {{avoid}} ---
+    context.exhaustedMotifs = this.motifTracker.getExhaustedMotifs()
 
     // --- Crisis: если drift >= 0.7, форсируем продолжение последней записи ---
     const lastEntry = context.recentEntries[0]?.content ?? ""
@@ -54,6 +69,14 @@ export class JournalEngine {
 
     let evaluation = await this.evaluator.evaluate(entry)
 
+    // Проверка последствий
+    const prevEntry = context.recentEntries[0] ?? null
+    const consequenceIssue = checkConsequences(entry, prevEntry)
+    if (consequenceIssue) {
+      evaluation.issues.push(consequenceIssue)
+      evaluation.valid = false
+    }
+
     for (let attempt = 1; attempt <= 2 && !evaluation.valid; attempt++) {
       console.warn(`Retry ${attempt}:`, evaluation.issues.join("; "))
       entry = await this.generator.generate({
@@ -63,6 +86,11 @@ export class JournalEngine {
         workingMemory
       })
       evaluation = await this.evaluator.evaluate(entry)
+      const retryConsequence = checkConsequences(entry, prevEntry)
+      if (retryConsequence) {
+        evaluation.issues.push(retryConsequence)
+        evaluation.valid = false
+      }
     }
 
     if (!evaluation.valid) {
@@ -85,6 +113,13 @@ export class JournalEngine {
     await this.memory.storeEntry(entry)
     await this.memory.storeReflection(reflection)
     await this.memory.saveSelfState(newState)
+
+    // --- Сканируем запись на истощённые мотивы ---
+    this.motifTracker.scanEntryWithReflection(entry, [
+      ...(reflection.newInsights || []),
+      ...(reflection.systemTension || [])
+    ])
+    this.motifTracker.save()
 
     await this.publisher.publish(entry, "console")
   }
