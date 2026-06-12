@@ -6,7 +6,7 @@
       "patterns": [
         "изолент"
       ],
-      "count": 11,
+      "count": 22,
       "exhaustion": 9
     },
     "skin_itch": {
@@ -17,8 +17,8 @@
         "плёнка на палец",
         "отпечатков нет"
       ],
-      "count": 4,
-      "exhaustion": 5.4
+      "count": 8,
+      "exhaustion": 9
     },
     "ticking": {
       "id": "ticking",
@@ -27,7 +27,7 @@
         "тикань",
         "6 гц"
       ],
-      "count": 7,
+      "count": 14,
       "exhaustion": 9
     },
     "fingerprint": {
@@ -37,8 +37,8 @@
         "без папиллярн",
         "нечеловеческий отпечаток"
       ],
-      "count": 3,
-      "exhaustion": 4.05
+      "count": 6,
+      "exhaustion": 7.695000000000001
     },
     "solovyov": {
       "id": "solovyov",
@@ -47,8 +47,8 @@
         "соловьёв",
         "соловьев"
       ],
-      "count": 10,
-      "exhaustion": 10
+      "count": 21,
+      "exhaustion": 7
     },
     "pulse_sync": {
       "id": "pulse_sync",
@@ -66,7 +66,7 @@
       "patterns": [
         "0.97"
       ],
-      "count": 8,
+      "count": 16,
       "exhaustion": 9
     },
     "ammonia": {
@@ -75,7 +75,7 @@
       "patterns": [
         "аммиак"
       ],
-      "count": 8,
+      "count": 16,
       "exhaustion": 9
     },
     "timer": {
@@ -85,8 +85,8 @@
         "таймер",
         "обратный отсчёт"
       ],
-      "count": 9,
-      "exhaustion": 6
+      "count": 18,
+      "exhaustion": 9
     },
     "wall_key": {
       "id": "wall_key",
@@ -94,8 +94,8 @@
       "patterns": [
         "ключ в стен"
       ],
-      "count": 2,
-      "exhaustion": 2.7
+      "count": 4,
+      "exhaustion": 5.13
     },
     "grey_powder": {
       "id": "grey_powder",
@@ -114,8 +114,8 @@
       "patterns": [
         "озон"
       ],
-      "count": 14,
-      "exhaustion": 9
+      "count": 29,
+      "exhaustion": 10
     },
     "biofilm": {
       "id": "biofilm",
@@ -125,8 +125,8 @@
         "биопленк",
         "органическая плёнк"
       ],
-      "count": 3,
-      "exhaustion": 4.05
+      "count": 6,
+      "exhaustion": 7.695000000000001
     },
     "solder": {
       "id": "solder",
@@ -135,7 +135,7 @@
         "припой",
         "флюс"
       ],
-      "count": 10,
+      "count": 20,
       "exhaustion": 9
     },
     "em_systems": {
@@ -146,8 +146,8 @@
         "em systems",
         "2031"
       ],
-      "count": 3,
-      "exhaustion": 4.05
+      "count": 6,
+      "exhaustion": 7.695000000000001
     },
     "protocol_merge": {
       "id": "protocol_merge",
@@ -157,9 +157,9 @@
         "гибридизаци",
         "нейроконтакт"
       ],
-      "count": 6,
-      "exhaustion": 8.1
+      "count": 12,
+      "exhaustion": 9
     }
   },
-  "totalScanned": 51
+  "totalScanned": 103
 }
