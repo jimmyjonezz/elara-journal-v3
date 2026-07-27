@@ -6,7 +6,7 @@
       "patterns": [
         "изолент"
       ],
-      "count": 473,
+      "count": 484,
       "exhaustion": 9
     },
     "skin_itch": {
@@ -17,7 +17,7 @@
         "плёнка на палец",
         "отпечатков нет"
       ],
-      "count": 172,
+      "count": 176,
       "exhaustion": 9
     },
     "ticking": {
@@ -27,7 +27,7 @@
         "тикань",
         "6 гц"
       ],
-      "count": 301,
+      "count": 308,
       "exhaustion": 9
     },
     "fingerprint": {
@@ -37,7 +37,7 @@
         "без папиллярн",
         "нечеловеческий отпечаток"
       ],
-      "count": 129,
+      "count": 132,
       "exhaustion": 9
     },
     "solovyov": {
@@ -47,7 +47,7 @@
         "соловьёв",
         "соловьев"
       ],
-      "count": 1333,
+      "count": 1386,
       "exhaustion": 7
     },
     "pulse_sync": {
@@ -57,7 +57,7 @@
         "пульс.*станци",
         "сердце.*стен"
       ],
-      "count": 133,
+      "count": 141,
       "exhaustion": 9
     },
     "pressure_097": {
@@ -66,7 +66,7 @@
       "patterns": [
         "0.97"
       ],
-      "count": 344,
+      "count": 352,
       "exhaustion": 9
     },
     "ammonia": {
@@ -75,7 +75,7 @@
       "patterns": [
         "аммиак"
       ],
-      "count": 436,
+      "count": 447,
       "exhaustion": 9
     },
     "timer": {
@@ -85,7 +85,7 @@
         "таймер",
         "обратный отсчёт"
       ],
-      "count": 527,
+      "count": 541,
       "exhaustion": 9
     },
     "wall_key": {
@@ -94,7 +94,7 @@
       "patterns": [
         "ключ в стен"
       ],
-      "count": 86,
+      "count": 88,
       "exhaustion": 9
     },
     "grey_powder": {
@@ -114,7 +114,7 @@
       "patterns": [
         "озон"
       ],
-      "count": 983,
+      "count": 1014,
       "exhaustion": 10
     },
     "biofilm": {
@@ -125,7 +125,7 @@
         "биопленк",
         "органическая плёнк"
       ],
-      "count": 129,
+      "count": 132,
       "exhaustion": 9
     },
     "solder": {
@@ -135,7 +135,7 @@
         "припой",
         "флюс"
       ],
-      "count": 430,
+      "count": 440,
       "exhaustion": 9
     },
     "em_systems": {
@@ -146,7 +146,7 @@
         "em systems",
         "2031"
       ],
-      "count": 129,
+      "count": 132,
       "exhaustion": 9
     },
     "protocol_merge": {
@@ -157,9 +157,9 @@
         "гибридизаци",
         "нейроконтакт"
       ],
-      "count": 320,
-      "exhaustion": 6
+      "count": 328,
+      "exhaustion": 9
     }
   },
-  "totalScanned": 3096
+  "totalScanned": 3190
 }
