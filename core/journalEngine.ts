@@ -32,7 +32,7 @@ export class JournalEngine {
 
     // --- Backfill мотивов из существующих записей (один раз) ---
     if (!this.backfilled) {
-      const allEntries = await this.memory.getRecent(1000)
+      const allEntries = await this.memory.getRecent(500)
       this.motifTracker.backfill(allEntries)
       this.backfilled = true
     }

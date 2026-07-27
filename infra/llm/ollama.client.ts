@@ -10,7 +10,7 @@ export class OllamaClient implements LLMClient {
     })
   }
 
-  async generate(prompt: string): Promise<string> {
+  async generate(prompt: string, options?: { temperature?: number; top_p?: number }): Promise<string> {
     const maxRetries = 3
     const baseDelay = 10000
 
@@ -22,9 +22,9 @@ export class OllamaClient implements LLMClient {
             { role: "user", content: prompt }
           ],
           options: {
-            temperature: 0.85,
+            temperature: options?.temperature ?? 0.85,
             repeat_penalty: 1.1,
-            top_p: 0.85,
+            top_p: options?.top_p ?? 0.85,
             top_k: 40
           }
         })

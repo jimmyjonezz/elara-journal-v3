@@ -12,7 +12,7 @@ export class OpenCodeClient implements LLMClient {
     })
   }
 
-  async generate(prompt: string): Promise<string> {
+  async generate(prompt: string, options?: { temperature?: number; top_p?: number }): Promise<string> {
     const maxRetries = 3
     const baseDelay = 5000 // start at 5s, exponential backoff: 5s, 10s, 20s
 
@@ -23,8 +23,8 @@ export class OpenCodeClient implements LLMClient {
           messages: [
             { role: "user", content: prompt }
           ],
-          temperature: 0.85,
-          top_p: 0.85
+          temperature: options?.temperature ?? 0.85,
+          top_p: options?.top_p ?? 0.85
         })
 
         const content = res.choices[0]?.message?.content

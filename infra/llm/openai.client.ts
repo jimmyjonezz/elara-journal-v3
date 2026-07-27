@@ -11,7 +11,7 @@ export class OpenAIClient implements LLMClient {
     })
   }
 
-  async generate(prompt: string): Promise<string> {
+  async generate(prompt: string, options?: { temperature?: number; top_p?: number }): Promise<string> {
     const maxRetries = 3
     const baseDelay = 5000
 
@@ -19,7 +19,9 @@ export class OpenAIClient implements LLMClient {
       try {
         const res = await this.client.chat.completions.create({
           model: process.env.OPENAI_MODEL || "gpt-4.1-nano",
-          messages: [{ role: "user", content: prompt }]
+          messages: [{ role: "user", content: prompt }],
+          temperature: options?.temperature ?? 0.85,
+          top_p: options?.top_p ?? 0.85
         })
 
         const content = res.choices[0]?.message?.content

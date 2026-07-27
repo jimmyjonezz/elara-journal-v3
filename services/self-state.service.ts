@@ -22,7 +22,7 @@ export function updateState(
   const repetitionSignal = (repetitionScore / 10) * 0.6 + themeRepeatRatio * 0.4
 
   // 4. Growth with decay
-  const drift = Math.min(1, prev.drift * 0.97 + repetitionSignal * 0.15)
+  const drift = Math.min(1, Math.max(0, prev.drift * 0.95 + repetitionSignal * 0.10))
 
   // --- Confidence (EMA with drift penalty) ---
   const score = reflection.score ?? 5
@@ -103,7 +103,7 @@ export function updateState(
   // --- Narrative Phase (drift-based, только рост) ---
   const prevPhase = prev.narrativePhase ?? 1
   const phaseFromDrift = Math.max(1, Math.min(6, Math.round(drift * 6))) as 1 | 2 | 3 | 4 | 5 | 6
-  const narrativePhase = Math.max(prevPhase, phaseFromDrift) as 1 | 2 | 3 | 4 | 5 | 6
+  const narrativePhase = phaseFromDrift
 
   return {
     mood,

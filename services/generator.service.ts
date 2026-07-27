@@ -17,7 +17,7 @@ export class AIGenerator implements Generator {
   async generate(context: Context): Promise<Entry> {
     const { recentEntries, state, reflections, workingMemory } = context
 
-    const lastReflection = reflections[0]
+    const lastReflection = reflections[reflections.length - 1]
 
     // Themes: последние из последнего reflection
     const currentThemesArr = lastReflection?.themes ?? []
@@ -32,13 +32,23 @@ export class AIGenerator implements Generator {
     // Insights: последние 2 из self-state
     const insights = (state.insights ?? []).slice(-2).join("\n")
 
-    // Dynamic Avoid: истощённые мотивы + issues из рефлексии
+    // Dynamic Avoid: истощённые мотивы + issues из ВСЕХ рефлексий (не только последней)
     const motifAvoid = context.exhaustedMotifs?.slice(0, 3).join("\n") ?? ""
-    const reflectionAvoid = (lastReflection?.issues ?? []).slice(-2).join("\n")
+
+    // Собираем issues из всех последних рефлексий, убираем дубликаты
+    const allIssues = reflections
+      .flatMap(r => (r as any).issues ?? [])
+      .filter(Boolean)
+    const uniqueIssues = [...new Set(allIssues)]
+    const reflectionAvoid = uniqueIssues.slice(-5).join("\n")
     const avoid = [motifAvoid, reflectionAvoid].filter(Boolean).join("\n")
 
-    // Dynamic Improve: макс 2 актуальных из последнего reflection
-    const improve = (lastReflection?.improvements ?? []).slice(-2).join("\n")
+    // Dynamic Improve: макс 5 актуальных из ВСЕХ рефлексий
+    const allImprovements = reflections
+      .flatMap(r => (r as any).improvements ?? [])
+      .filter(Boolean)
+    const uniqueImprovements = [...new Set(allImprovements)]
+    const improve = uniqueImprovements.slice(-5).join("\n")
 
     // Recent Entries: только последний абзац предыдущей записи
     const lastEntry = recentEntries[0]?.content ?? ""
@@ -73,7 +83,15 @@ export class AIGenerator implements Generator {
       .replace("{{workingMemory}}", workingMemory.join("\n") || "None")
       .replace("{{voicePhase}}", voicePhase)
 
-    const content = await this.llm.generate(prompt)
+    // H: Динамическая температура на основе confidence
+    // Низкий confidence → выше температура (больше случайности, шанс выйти из цикла)
+    const tempConf = state.confidence ?? 0.7
+    const llmOptions = {
+      temperature: tempConf > 0.8 ? 0.7 : tempConf > 0.7 ? 0.85 : tempConf > 0.6 ? 1.0 : 1.2,
+      top_p: tempConf > 0.8 ? 0.8 : tempConf > 0.7 ? 0.85 : tempConf > 0.6 ? 0.9 : 0.95
+    }
+
+    const content = await this.llm.generate(prompt, llmOptions)
 
     return {
       id: crypto.randomUUID(),
