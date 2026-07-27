@@ -1,1 +1,165 @@
-{"exhausted":[],"counts":{}}
+{
+  "motifs": {
+    "isolation_tape": {
+      "id": "isolation_tape",
+      "label": "Синяя изолента (пожелтение, слоение)",
+      "patterns": [
+        "изолент"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "skin_itch": {
+      "id": "skin_itch",
+      "label": "Зуд кожи / плёнка на пальцах",
+      "patterns": [
+        "зуд",
+        "плёнка на палец",
+        "отпечатков нет"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "ticking": {
+      "id": "ticking",
+      "label": "Тиканье контроллера / 6 Гц",
+      "patterns": [
+        "тикань",
+        "6 гц"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "fingerprint": {
+      "id": "fingerprint",
+      "label": "Отпечаток без папиллярных линий",
+      "patterns": [
+        "без папиллярн",
+        "нечеловеческий отпечаток"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "solovyov": {
+      "id": "solovyov",
+      "label": "Присутствие / голос Соловьёва",
+      "patterns": [
+        "соловьёв",
+        "соловьев"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "pulse_sync": {
+      "id": "pulse_sync",
+      "label": "Пульс героя = пульс станции",
+      "patterns": [
+        "пульс.*станци",
+        "сердце.*стен"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "pressure_097": {
+      "id": "pressure_097",
+      "label": "Давление 0.97 / датчики врут",
+      "patterns": [
+        "0.97"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "ammonia": {
+      "id": "ammonia",
+      "label": "Аммиак / химический запах",
+      "patterns": [
+        "аммиак"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "timer": {
+      "id": "timer",
+      "label": "Таймер / обратный отсчёт",
+      "patterns": [
+        "таймер",
+        "обратный отсчёт"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "wall_key": {
+      "id": "wall_key",
+      "label": "Ключ в стене",
+      "patterns": [
+        "ключ в стен"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "grey_powder": {
+      "id": "grey_powder",
+      "label": "Серые хлопья / магнитная пыль",
+      "patterns": [
+        "серые хлопья",
+        "магнитная пыль",
+        "серая пыль"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "ozone": {
+      "id": "ozone",
+      "label": "Озон / электрический запах",
+      "patterns": [
+        "озон"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "biofilm": {
+      "id": "biofilm",
+      "label": "Органическая биоплёнка / живая стена",
+      "patterns": [
+        "биоплёнк",
+        "биопленк",
+        "органическая плёнк"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "solder": {
+      "id": "solder",
+      "label": "Серебристый припой / чужой флюс",
+      "patterns": [
+        "припой",
+        "флюс"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "em_systems": {
+      "id": "em_systems",
+      "label": "Штамп E.M. Systems, 2031",
+      "patterns": [
+        "e.m. systems",
+        "em systems",
+        "2031"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "protocol_merge": {
+      "id": "protocol_merge",
+      "label": "Протокол слияния / гибридизация",
+      "patterns": [
+        "слияни",
+        "гибридизаци",
+        "нейроконтакт"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    }
+  },
+  "totalScanned": 1
+}
