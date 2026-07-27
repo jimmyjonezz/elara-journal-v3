@@ -1,10 +1,24 @@
 {
-  "drift": 0.01,
-  "confidence": 0.7,
-  "mood": "reflective",
+  "mood": "curious",
+  "themes": [
+    "The ceiling letters as a recurring visual enigma",
+    "The old woman’s whispers and withheld secrets",
+    "Paranormal observation as a narrative catalyst"
+  ],
+  "insights": [
+    "She might decode the ceiling letters through writing",
+    "Confront the feeling of being watched by experimenting with recording herself"
+  ],
+  "systemTension": [
+    "Dream letters persist into waking vision, blurring perception",
+    "The observed feeling escalates from vague to tactile (air density)"
+  ],
+  "unresolvedThreads": [
+    "The old woman’s whispers and withheld secrets",
+    "Dream letters persist into waking vision, blurring perception",
+    "The observed feeling escalates from vague to tactile (air density)"
+  ],
   "narrativePhase": 1,
-  "themes": [],
-  "insights": [],
-  "systemTension": [],
-  "unresolvedThreads": []
+  "drift": 0.0215,
+  "confidence": 0.6996249999999999
 }
