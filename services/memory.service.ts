@@ -155,8 +155,18 @@ export class JsonMemoryService implements Memory {
       const raw = JSON.parse(fs.readFileSync(this.reflectionPath, "utf-8"))
 
       const reflections: Reflection[] = raw.map((r: any) => ({
-        ...r,
-        createdAt: new Date(r.createdAt)
+        id: r.id,
+        entryId: r.entryId,
+        analysis: r.analysis ?? "",
+        score: r.score ?? 5,
+        repetitionScore: r.repetitionScore ?? 5,
+        issues: r.issues ?? [],
+        improvements: r.improvements ?? [],
+        themes: r.themes ?? [],
+        newInsights: r.newInsights ?? [],
+        systemTension: r.systemTension ?? [],
+        abandonedThreads: r.abandonedThreads ?? [],
+        createdAt: new Date(r.createdAt ?? new Date())
       }))
 
       this.cache.reflections = reflections
@@ -295,7 +305,9 @@ export class JsonMemoryService implements Memory {
 
   async getRecentReflections(limit: number): Promise<Reflection[]> {
     const all = this.readReflections()
-    return all.slice(Math.max(0, all.length - limit))
+    return all
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit)
   }
 
   async storeEntry(entry: Entry): Promise<void> {
@@ -306,12 +318,14 @@ export class JsonMemoryService implements Memory {
     }
 
     entries.push(entry)
+    entries.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
     this.write(entries)
   }
 
   async storeReflection(reflection: Reflection): Promise<void> {
     const reflections = this.readReflections()
     reflections.push(reflection)
+    reflections.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     this.writeReflections(reflections)
   }
 

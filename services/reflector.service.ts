@@ -14,12 +14,16 @@ export class AIReflector implements Reflector {
 
   async reflect(entry: Entry, context: Context): Promise<Reflection> {
     const previousThemes = context?.state?.themes?.join("\n") || "(нет предыдущих тем)"
+    const currentConfidence = context?.state?.confidence ?? 0.7
+    const currentDrift = context?.state?.drift ?? 0.5
 
     const template = (await this.prompts.getPrompt("reflection")).template
 
     const prompt = template
       .replace("<entry>", entry.content)
       .replace("{{themes}}", previousThemes)
+      .replace("{{confidence}}", String(currentConfidence))
+      .replace("{{drift}}", String(currentDrift))
 
     const raw = await this.llm.generate(prompt)
 
