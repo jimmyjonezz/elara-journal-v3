@@ -1,0 +1,211 @@
+{
+  "motifs": {
+    "coffee_tea": {
+      "id": "coffee_tea",
+      "label": "Кофе / чай / кружка на столе",
+      "patterns": [
+        "кофе",
+        "чай",
+        "кружк"
+      ],
+      "count": 1,
+      "exhaustion": 1.5
+    },
+    "window_light": {
+      "id": "window_light",
+      "label": "Свет из окна / уличный фонарь / рассвет",
+      "patterns": [
+        "окн",
+        "фонар",
+        "свет.*улиц",
+        "рассвет",
+        "закат"
+      ],
+      "count": 1,
+      "exhaustion": 1.35
+    },
+    "phone_call": {
+      "id": "phone_call",
+      "label": "Звонок / телефон / сообщение",
+      "patterns": [
+        "звон",
+        "телефон",
+        "сообщени",
+        "эсэмэс",
+        "позвони"
+      ],
+      "count": 2,
+      "exhaustion": 3
+    },
+    "door_entrance": {
+      "id": "door_entrance",
+      "label": "Дверь / вход / порог / коридор",
+      "patterns": [
+        "двер",
+        "вход",
+        "порог",
+        "коридор"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "bed_sleep": {
+      "id": "bed_sleep",
+      "label": "Кровать / подушка / лечь спать / заснуть",
+      "patterns": [
+        "кроват",
+        "подушк",
+        "лечь спать",
+        "засну",
+        "ложусь",
+        "постел"
+      ],
+      "count": 1,
+      "exhaustion": 1.35
+    },
+    "writing_process": {
+      "id": "writing_process",
+      "label": "Письмо / страница / экран / текст / глава",
+      "patterns": [
+        "страниц",
+        "экран",
+        "текст",
+        "глав",
+        "роман",
+        "пис"
+      ],
+      "count": 2,
+      "exhaustion": 0
+    },
+    "rain_weather": {
+      "id": "rain_weather",
+      "label": "Дождь / погода / туман / ветер",
+      "patterns": [
+        "дожд",
+        "погод",
+        "туман",
+        "ветер",
+        "сырост"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    },
+    "dream_letters": {
+      "id": "dream_letters",
+      "label": "Буквы / символы / потолок / вязь",
+      "patterns": [
+        "букв",
+        "символ",
+        "потолок",
+        "вязь",
+        "трещин"
+      ],
+      "count": 2,
+      "exhaustion": 0
+    },
+    "whispers_voice": {
+      "id": "whispers_voice",
+      "label": "Шёпот / голос / тишина / дыхание",
+      "patterns": [
+        "шёпот",
+        "шепот",
+        "голос",
+        "тишин",
+        "дыша",
+        "дыхани"
+      ],
+      "count": 1,
+      "exhaustion": 1.35
+    },
+    "city_sounds": {
+      "id": "city_sounds",
+      "label": "Городские звуки / соседи / лифт / улица",
+      "patterns": [
+        "лифт",
+        "сосед",
+        "улиц",
+        "шум.*город",
+        "машин"
+      ],
+      "count": 1,
+      "exhaustion": 1.5
+    },
+    "food_meal": {
+      "id": "food_meal",
+      "label": "Еда / завтрак / обед / ужин",
+      "patterns": [
+        "завтрак",
+        "обед",
+        "ужин",
+        "ела",
+        "хлеб"
+      ],
+      "count": 2,
+      "exhaustion": 3
+    },
+    "stare_observation": {
+      "id": "stare_observation",
+      "label": "Ощущение наблюдения / взгляд / присутствие",
+      "patterns": [
+        "наблюда",
+        "взгляд",
+        "присутстви",
+        "чужи.*глаз",
+        "смотрит"
+      ],
+      "count": 2,
+      "exhaustion": 0
+    },
+    "mom_family": {
+      "id": "mom_family",
+      "label": "Мама / семья / родственники",
+      "patterns": [
+        "мам",
+        "пап",
+        "семь",
+        "родственник"
+      ],
+      "count": 2,
+      "exhaustion": 0
+    },
+    "cold_warm": {
+      "id": "cold_warm",
+      "label": "Холод / тепло / температура тела / озноб",
+      "patterns": [
+        "холод",
+        "тепл",
+        "озноб",
+        "мёрзн",
+        "зябк"
+      ],
+      "count": 1,
+      "exhaustion": 1.35
+    },
+    "memory_forget": {
+      "id": "memory_forget",
+      "label": "Память / забыть / вспомнить / помню",
+      "patterns": [
+        "памят",
+        "забы",
+        "вспомн",
+        "помн",
+        "помню"
+      ],
+      "count": 1,
+      "exhaustion": 1.35
+    },
+    "mirror_reflection": {
+      "id": "mirror_reflection",
+      "label": "Зеркало / отражение / двойник",
+      "patterns": [
+        "зеркал",
+        "отражени",
+        "двойник",
+        "себя в"
+      ],
+      "count": 0,
+      "exhaustion": 0
+    }
+  },
+  "totalScanned": 2
+}
