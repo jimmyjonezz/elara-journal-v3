@@ -105,8 +105,8 @@
         fetch("data/self-state.json").then(r => r.json())
       ])
 
-      const lastEntry = entries[entries.length - 1]
-      const lastReflection = reflections[reflections.length - 1]
+      const lastEntry = entries[0]
+      const lastReflection = reflections[0]
 
       renderEntry(lastEntry)
       renderReflection(lastReflection)
