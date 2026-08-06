@@ -22,7 +22,9 @@ export function updateState(
   const repetitionSignal = (repetitionScore / 10) * 0.6 + themeRepeatRatio * 0.4
 
   // 4. Growth with decay
-  const drift = Math.min(1, Math.max(0, prev.drift * 0.95 + repetitionSignal * 0.10))
+  // Слабое затухание и достаточный вес сигнала, чтобы повторения РЕАЛЬНО поднимали
+  // drift → росла narrative-Fase → менялся голос (иначе фаза намертво = 1)
+  const drift = Math.min(1, Math.max(0, prev.drift * 0.92 + repetitionSignal * 0.12))
 
   // --- Confidence (EMA with drift penalty) ---
   const score = reflection.score ?? 5
@@ -70,18 +72,19 @@ export function updateState(
     ...(reflection.systemTension || [])
   ]
 
-  // Abandoned threads имеют высший приоритет — ставим их первыми
+  // Abandoned threads НЕ поднимаем в приоритет — иначе система вечно воскрешает
+  // брошенные линии, и loop не рвётся. Свежие открытые — впереди.
   const abandoned = reflection.abandonedThreads || []
 
   const merged = [
-    ...abandoned,
+    ...freshThreads,
     ...(prev.unresolvedThreads || []),
-    ...freshThreads
+    ...abandoned
   ]
 
   const unresolvedThreads = Array.from(
     new Set(merged)
-  ).slice(-7)
+  ).slice(0, 7)
 
   // --- Mood ---
   let mood: SelfState["mood"]

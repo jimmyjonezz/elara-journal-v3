@@ -17,7 +17,7 @@ export class AIGenerator implements Generator {
   async generate(context: Context): Promise<Entry> {
     const { recentEntries, state, reflections, workingMemory } = context
 
-    const lastReflection = reflections[reflections.length - 1]
+    const lastReflection = reflections[0] ?? reflections[reflections.length - 1]
 
     // Themes: последние из последнего reflection
     const currentThemesArr = lastReflection?.themes ?? []
@@ -33,7 +33,7 @@ export class AIGenerator implements Generator {
     const insights = (state.insights ?? []).slice(-2).join("\n")
 
     // Dynamic Avoid: истощённые мотивы + issues из ВСЕХ рефлексий (не только последней)
-    const motifAvoid = context.exhaustedMotifs?.slice(0, 3).join("\n") ?? ""
+    const motifAvoid = context.exhaustedMotifs?.slice(0, 8).join("\n") ?? ""
 
     // Собираем issues из всех последних рефлексий, убираем дубликаты
     const allIssues = reflections
@@ -55,8 +55,14 @@ export class AIGenerator implements Generator {
     const lastParagraph = lastEntry.split("\n\n").pop() ?? ""
 
     // Narrative Vector: systemTension из state или fallback из последнего абзаца
-    const narrativeVector = (state.systemTension?.[0])
-      ?? (lastReflection?.systemTension?.[0])
+    const latestSystemTension = state.systemTension?.length
+      ? state.systemTension[state.systemTension.length - 1]
+      : null
+    const latestReflectionTension = lastReflection?.systemTension?.length
+      ? lastReflection.systemTension[lastReflection.systemTension.length - 1]
+      : null
+    const narrativeVector = latestSystemTension
+      ?? latestReflectionTension
       ?? lastParagraph.split(".").pop()?.trim() ?? ""
 
     const template = (await this.prompts.getPrompt("generation")).template

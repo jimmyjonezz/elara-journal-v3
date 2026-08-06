@@ -207,6 +207,7 @@ export class MotifTracker {
   getExhaustedMotifs(): string[] {
     return Object.values(this.state.motifs)
       .filter(m => m.exhaustion >= EXHAUSTION_THRESHOLD)
+      .sort((a, b) => b.exhaustion - a.exhaustion)
       .map(m => `[ПОВТОР МОТИВА] ${m.label} — уже использован ${m.count} раз(а)`)
   }
 
