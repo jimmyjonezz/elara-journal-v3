@@ -8,7 +8,7 @@
         "чай",
         "кружк"
       ],
-      "count": 40,
+      "count": 42,
       "exhaustion": 10
     },
     "window_light": {
@@ -21,7 +21,7 @@
         "рассвет",
         "закат"
       ],
-      "count": 69,
+      "count": 73,
       "exhaustion": 10
     },
     "phone_call": {
@@ -34,7 +34,7 @@
         "эсэмэс",
         "позвони"
       ],
-      "count": 61,
+      "count": 64,
       "exhaustion": 10
     },
     "door_entrance": {
@@ -46,7 +46,7 @@
         "порог",
         "коридор"
       ],
-      "count": 116,
+      "count": 123,
       "exhaustion": 10
     },
     "bed_sleep": {
@@ -60,7 +60,7 @@
         "ложусь",
         "постел"
       ],
-      "count": 25,
+      "count": 27,
       "exhaustion": 10
     },
     "writing_process": {
@@ -74,7 +74,7 @@
         "роман",
         "пис"
       ],
-      "count": 224,
+      "count": 242,
       "exhaustion": 10
     },
     "rain_weather": {
@@ -87,7 +87,7 @@
         "ветер",
         "сырост"
       ],
-      "count": 67,
+      "count": 72,
       "exhaustion": 10
     },
     "dream_letters": {
@@ -100,7 +100,7 @@
         "вязь",
         "трещин"
       ],
-      "count": 225,
+      "count": 242,
       "exhaustion": 10
     },
     "whispers_voice": {
@@ -114,7 +114,7 @@
         "дыша",
         "дыхани"
       ],
-      "count": 139,
+      "count": 149,
       "exhaustion": 10
     },
     "city_sounds": {
@@ -127,7 +127,7 @@
         "шум.*город",
         "машин"
       ],
-      "count": 118,
+      "count": 125,
       "exhaustion": 10
     },
     "food_meal": {
@@ -140,7 +140,7 @@
         "ела",
         "хлеб"
       ],
-      "count": 251,
+      "count": 272,
       "exhaustion": 10
     },
     "stare_observation": {
@@ -153,7 +153,7 @@
         "чужи.*глаз",
         "смотрит"
       ],
-      "count": 95,
+      "count": 100,
       "exhaustion": 10
     },
     "mom_family": {
@@ -165,7 +165,7 @@
         "семь",
         "родственник"
       ],
-      "count": 96,
+      "count": 101,
       "exhaustion": 10
     },
     "cold_warm": {
@@ -178,7 +178,7 @@
         "мёрзн",
         "зябк"
       ],
-      "count": 100,
+      "count": 108,
       "exhaustion": 10
     },
     "memory_forget": {
@@ -191,7 +191,7 @@
         "помн",
         "помню"
       ],
-      "count": 137,
+      "count": 150,
       "exhaustion": 10
     },
     "mirror_reflection": {
@@ -207,5 +207,5 @@
       "exhaustion": 0
     }
   },
-  "totalScanned": 251
+  "totalScanned": 272
 }
