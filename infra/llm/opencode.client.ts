@@ -19,7 +19,7 @@ export class OpenCodeClient implements LLMClient {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const res = await this.client.chat.completions.create({
-          model: process.env.OPENCODE_MODEL || "nemotron-3.5-lightning-free",
+          model: process.env.OPENCODE_MODEL || "ling-3.0-flash-fin-free",
           messages: [
             { role: "user", content: prompt }
           ],
