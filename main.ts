@@ -11,7 +11,7 @@ import { AIReflector } from "./services/reflector.service"
 import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 
-import { OpenCodeClient } from "./infra/llm/opencode.client"
+import { OllamaClient } from "./infra/llm/ollama.client"
 import { VoyageClient } from "./infra/llm/voyage.client"
 
 import { FilePromptManager } from "./services/prompt.service"
