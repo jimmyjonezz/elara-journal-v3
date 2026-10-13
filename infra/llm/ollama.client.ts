@@ -6,7 +6,7 @@ export class OllamaClient implements LLMClient {
 
   constructor() {
     this.client = new Ollama({
-      host: process.env.OLLAMA_HOST || "http://localhost:11434"
+      host: process.env.OLLAMA_HOST || "https://ollama.com/v1/chat/completions"
     })
   }
 
