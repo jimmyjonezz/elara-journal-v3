@@ -17,7 +17,7 @@ export class OllamaClient implements LLMClient {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const res = await this.client.chat({
-          model: process.env.OLLAMA_MODEL || "llama3.2",
+          model: process.env.OLLAMA_MODEL || "gemma4:31b-cloud",
           messages: [
             { role: "user", content: prompt }
           ],
