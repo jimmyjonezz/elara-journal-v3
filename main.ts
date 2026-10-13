@@ -18,7 +18,8 @@ import { FilePromptManager } from "./services/prompt.service"
 
 async function main() {
   // --- LLM ---
-  const llm = new OpenCodeClient()
+  //const llm = new OpenCodeClient()
+  const llm = new OllamaClient()
 
   // --- Prompts ---
   const prompts = new FilePromptManager()
