@@ -50,8 +50,11 @@ async function main() {
   await engine.runCycle()
 }
 
-// безопасный запуск
+// Запуск: ошибка роняет процесс (exit 1), чтобы CI видел провал, а не
+// молча коммитил «No changes» 2.5 месяца (как было с закомментированным
+// Ollama-клиентом — сайт стоял с 20 августа при зелёных.Run'ах).
 main().catch(err => {
   console.error("Fatal error:", err)
+  process.exit(1)
 })
 
