@@ -208,9 +208,7 @@ export class JsonMemoryService implements Memory {
         insights: [],
         systemTension: [],
         narrativePhase: 1,
-        unresolvedThreads: [
-          "Нет открытых сюжетных линий — введи новую",
-        ],
+        unresolvedThreads: [],
         drift: 0.3,
         confidence: 0.5
       }
@@ -230,9 +228,7 @@ export class JsonMemoryService implements Memory {
         insights: raw.insights || [],
         systemTension: raw.systemTension || [],
         narrativePhase: raw.narrativePhase ?? 1,
-        unresolvedThreads: raw.unresolvedThreads || [
-          "Нет открытых сюжетных линий — введи новую",
-        ],
+        unresolvedThreads: raw.unresolvedThreads || [],
         drift: raw.drift ?? 0.3,
         confidence: raw.confidence ?? 0.5
       }
@@ -246,9 +242,7 @@ export class JsonMemoryService implements Memory {
         insights: [],
         systemTension: [],
         narrativePhase: 1,
-        unresolvedThreads: [
-          "Нет открытых сюжетных линий — введи новую",
-        ],
+        unresolvedThreads: [],
         drift: 0.3,
         confidence: 0.5
       }
