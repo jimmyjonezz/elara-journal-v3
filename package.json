@@ -4,7 +4,8 @@
   "main": "main.ts",
   "scripts": {
     "start": "ts-node main.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:motif": "tsc tests-stage2/motif_test.ts --outDir .cache-test --module commonjs --target es2020 --esModuleInterop --skipLibCheck && node .cache-test/tests-stage2/motif_test.js"
   },
   "dependencies": {
     "dotenv": "^16.0.0",

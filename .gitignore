@@ -70,3 +70,4 @@ coverage/
 
 # (если добавишь позже)
 !data/reflections.json
+.cache-test/
