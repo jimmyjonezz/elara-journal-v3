@@ -11,6 +11,7 @@ import { normalizeEmbedding } from "../utils/embedding.utils"
 import { cosineSimilarity } from "../utils/vector.utils"
 import { checkConsequences } from "../services/evaluator.service"
 import { MotifTracker } from "../services/motif.service"
+import { getSeasonalAnchor, anchorHit } from "../services/seasonal.service"
 
 export class JournalEngine {
   private motifTracker = new MotifTracker()
@@ -36,6 +37,9 @@ export class JournalEngine {
 
     const state = await this.memory.getSelfState()
     const reflections = await this.memory.getRecentReflections(5)
+
+    // [STAGE 4] Внешний якорь: seasonal anchor, shadow-режим (лог, не gate)
+    context.seasonalAnchor = getSeasonalAnchor()
 
     // --- Backfill мотивов из существующих записей (один раз) ---
     if (!this.backfilled) {
@@ -100,17 +104,14 @@ export class JournalEngine {
       evaluation.valid = false
     }
 
-    // [STAGE 1] Ретраи Income с обратной связью: проблемы предыдущей попытки
-    // попадают в workingMemory, а не слепо повторяется тот же промпт
+    // [STAGE 4] Ретраи: feedback идёт отдельным каналом (раньше клался в
+    // workingMemory и промпт мог развивать его как сюжетную линию)
     for (let attempt = 1; attempt <= 2 && !evaluation.valid; attempt++) {
-      const feedback = evaluation.issues.map(i => `[RETRY FEEDBACK] ${i}`)
       console.warn(`Retry ${attempt}:`, evaluation.issues.join("; "))
-      entry = await this.generator.generate({
-        ...context,
-        state,
-        reflections,
-        workingMemory: [...feedback, ...workingMemory]
-      })
+      entry = await this.generator.generate(
+        { ...context, state, reflections, workingMemory },
+        evaluation.issues
+      )
       evaluation = await this.evaluator.evaluate(entry)
       novelty = await checkNovelty(entry.content)
       applyConsequence()
@@ -148,6 +149,13 @@ export class JournalEngine {
     this.motifTracker.save()
 
     await this.publisher.publish(entry, "console")
+
+    // [STAGE 4] Shadow-режим: логируем попадание якоря, не роняем запись.
+    // Hard gate — только если hit-rate ≥90% на 7+ прогонах (пока данных нет)
+    const hit = anchorHit(entry.content, context.seasonalAnchor)
+    console.log(
+      `[ANCHOR] seasonal="${context.seasonalAnchor.text}" hit=${hit}`
+    )
 
     // [STAGE 1] Health check: успешный цикл обязан добавить запись за сегодня
     const after = await this.memory.getRecent(1)

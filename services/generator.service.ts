@@ -14,41 +14,53 @@ export class AIGenerator implements Generator {
     private prompts: FilePromptManager
   ) {}
 
-  async generate(context: Context): Promise<Entry> {
-    const { recentEntries, state, reflections, workingMemory } = context
+  async generate(context: Context, retryFeedback?: string[]): Promise<Entry> {
+    const { recentEntries, distantEchoes, state, reflections, workingMemory } = context
 
     const lastReflection = reflections[0] ?? reflections[reflections.length - 1]
 
     // Themes: последние из последнего reflection
     const currentThemesArr = lastReflection?.themes ?? []
-    const currentThemes = currentThemesArr.join("\n") || state.themes.join("\n")
+    const currentThemes = currentThemesArr.join("\n") || state.themes.slice(-3).join("\n")
 
-    // Known Themes: из self-state (прошлые), без дублирования текущих, макс 2
+    // Known Themes: последние 2 (раньше slice(0,2) — самые протухшие),
+    // фильтруем против ЭФФЕКТИВНЫХ текущих тем, а не только reflection
+    const effectiveThemes = currentThemes.split("\n").map(t => t.trim())
     const knownThemes = state.themes
-      .filter(t => !currentThemesArr.includes(t))
-      .slice(0, 2)
+      .filter(t => !effectiveThemes.includes(t.trim()))
+      .slice(-2)
       .join("\n")
 
     // Insights: последние 2 из self-state
     const insights = (state.insights ?? []).slice(-2).join("\n")
 
-    // Dynamic Avoid: истощённые мотивы + issues из ВСЕХ рефлексий (не только последней)
-    const motifAvoid = context.exhaustedMotifs?.slice(0, 8).join("\n") ?? ""
+    // [STAGE 4] REBALANCING: avoid 8→3, improve 5→2.
+    // 18/22 мотивов exhausted → 8 строкavoid = прайминг названиями
+    // образов (соль/старушка/К), а остальные каналы тонули в шуме
+    const motifAvoid = context.exhaustedMotifs?.slice(0, 3).join("\n") ?? ""
 
-    // Собираем issues из всех последних рефлексий, убираем дубликаты
     const allIssues = reflections
       .flatMap(r => (r as any).issues ?? [])
       .filter(Boolean)
     const uniqueIssues = [...new Set(allIssues)]
-    const reflectionAvoid = uniqueIssues.slice(-5).join("\n")
+    const reflectionAvoid = uniqueIssues.slice(-1).join("\n")
     const avoid = [motifAvoid, reflectionAvoid].filter(Boolean).join("\n")
 
-    // Dynamic Improve: макс 5 актуальных из ВСЕХ рефлексий
+    // Dynamic Improve: макс 2
     const allImprovements = reflections
       .flatMap(r => (r as any).improvements ?? [])
       .filter(Boolean)
     const uniqueImprovements = [...new Set(allImprovements)]
-    const improve = uniqueImprovements.slice(-5).join("\n")
+    const improve = uniqueImprovements.slice(-2).join("\n")
+
+    // Distant Echoes [STAGE 4]: MMR-выбранные далёкие записи,
+    // выдержки по 2 предложения — не полные мегабайты
+    const echoExcerpts = (distantEchoes ?? [])
+      .map(e => {
+        const sentences = e.content?.split(/(?<=[.?!])\s+/).slice(0, 2).join(" ") ?? ""
+        return `(${e.createdAt ? new Date(e.createdAt).toLocaleDateString("ru-RU") : "?"}) ${sentences}`
+      })
+      .join("\n")
 
     // Recent Entries: только последний абзац предыдущей записи
     const lastEntry = recentEntries[0]?.content ?? ""
@@ -88,6 +100,10 @@ export class AIGenerator implements Generator {
       .replace("{{narrativeVector}}", narrativeVector)
       .replace("{{workingMemory}}", workingMemory.join("\n") || "None")
       .replace("{{voicePhase}}", voicePhase)
+      // [STAGE 4] внешний якорь + далёкие эхо + retry-канал
+      .replace("{{seasonalAnchor}}", context.seasonalAnchor?.text ?? "")
+      .replace("{{distantEchoes}}", echoExcerpts || "None")
+      .replace("{{retryFeedback}}", (retryFeedback ?? []).join("\n") || "None")
 
     // H: Динамическая температура на основе confidence
     // Низкий confidence → выше температура (больше случайности, шанс выйти из цикла)

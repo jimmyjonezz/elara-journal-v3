@@ -9,7 +9,7 @@ import { Reflection } from "../domain/reflection"
 import { Context } from "../domain/context"
 import { EmbeddingService } from "../interfaces/embedding"
 import { SelfState } from "../domain/self-state"
-import { cosineSimilarity } from "../utils/vector.utils"
+import { cosineSimilarity, mmrSelect, MmrCandidate } from "../utils/vector.utils"
 
 export class JsonMemoryService implements Memory {
   private filePath = path.resolve("data/entries.json")
@@ -339,21 +339,42 @@ export class JsonMemoryService implements Memory {
     const reflections = await this.getRecentReflections(3)
     const state = await this.getSelfState()
 
-    const semanticMatches =
-      recentEntries.length > 0
-        ? await this.searchSemantic(
-            recentEntries[0].content,
-            3
-          )
-        : []
+    // [STAGE 4] Далёкие эхо: MMR поверх всех записей, исключая последние 5.
+    // До этого: searchSemantic(query=последняя запись, 3) → сама запись
+    // (cos=1.0) + соседи = усиление аттрактора.
+    let distantEchoes: Entry[] = []
+    if (recentEntries.length > 0) {
+      const excludeIds = new Set(recentEntries.map(e => e.id))
+      distantEchoes = await this.getDistantEchoes(recentEntries[0].id, 3, excludeIds)
+    }
 
     return {
       recentEntries,
-      semanticMatches,
+      distantEchoes,
       reflections,
       state,
       workingMemory: state.unresolvedThreads.slice(0, 3),
       exhaustedMotifs: []
     }
+  }
+
+  // [STAGE 4] MMR-выборка далёких по содержанию записей
+  async getDistantEchoes(
+    queryEntryId: string,
+    limit: number,
+    excludeIds: Set<string>
+  ): Promise<Entry[]> {
+    const entries = this.read()
+    if (entries.length === 0) return []
+
+    const queryEntry = entries.find(e => e.id === queryEntryId)
+    if (!queryEntry?.embedding?.length) return []
+
+    // пул: всё, что не исключено и имеет embedding
+    const candidates: MmrCandidate<Entry>[] = entries
+      .filter(e => e.embedding?.length && !excludeIds.has(e.id))
+      .map(e => ({ item: e, vector: e.embedding }))
+
+    return mmrSelect(queryEntry.embedding, candidates, limit, 0.3)
   }
 }

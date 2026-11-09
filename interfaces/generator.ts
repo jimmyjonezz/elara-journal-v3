@@ -3,5 +3,5 @@ import { Context } from "../domain/context"
 import { Entry } from "../domain/entry"
 
 export interface Generator {
-  generate(context: Context): Promise<Entry>
+  generate(context: Context, retryFeedback?: string[]): Promise<Entry>
 }

@@ -5,7 +5,7 @@
   "scripts": {
     "start": "ts-node main.ts",
     "typecheck": "tsc --noEmit",
-    "test:motif": "tsc tests-stage2/motif_test.ts --outDir .cache-test --module commonjs --target es2020 --esModuleInterop --skipLibCheck && node .cache-test/tests-stage2/motif_test.js"
+    "test:stage": "tsc tests-stage2/stage4_test.ts tests-stage2/prompt_e2e_test.ts --outDir .cache-test --module commonjs --target es2020 --esModuleInterop --skipLibCheck && node .cache-test/tests-stage2/stage4_test.js && node .cache-test/tests-stage2/prompt_e2e_test.js",
   },
   "dependencies": {
     "dotenv": "^16.0.0",
