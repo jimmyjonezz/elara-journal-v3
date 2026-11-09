@@ -47,25 +47,10 @@ export class JournalEngine {
     // --- Истощённые мотивы для {{avoid}} ---
     context.exhaustedMotifs = this.motifTracker.getExhaustedMotifs()
 
-    // --- Crisis: если drift >= 0.7, форсируем продолжение последней записи ---
-    const lastEntry = context.recentEntries[0]?.content ?? ""
-    const sentences = lastEntry
-      .split(/\n\n+/)
-      .pop() ?? ""
-    const lastSentence = sentences
-      .split(/[.?!]\s*/)
-      .filter(s => s.trim().length > 0)
-      .pop() ?? ""
-
-    const needsContinuation = state.drift >= 0.7 && lastSentence.length > 0
-
-    const workingMemory = needsContinuation
-      ? [`[FORCED CONTINUATION] "${lastSentence.trim()}" — продолжи ровно с этого момента. Первое слово новой записи = прямое продолжение последнего действия.`, ...context.workingMemory]
-      : context.workingMemory
-
-    if (needsContinuation) {
-      console.warn(`[CRISIS] Drift=${state.drift.toFixed(2)} — forced continuation from: "${lastSentence.trim()}"`)
-    }
+    // [STAGE 3] Crisis FORCED CONTINUATION убран: продолжение последнего
+    // предложения — механический повтор, худший вид петли. drift>=0.7 теперь
+    // влияет только на голос (voice-phases), а не на структуру записи.
+    const workingMemory = context.workingMemory
 
     // [STAGE 1] Замер подобия кандидата: embedding + cosine к предыдущим 3
     const recentVecs = context.recentEntries
@@ -145,19 +130,21 @@ export class JournalEngine {
 
     entry.embedding = novelty.vec
 
+    // [STAGE 3] Измеренный сигнал повторения → drift (вместо LLM self-report)
+    const recentCos = recentVecs.length
+      ? Math.max(...recentVecs.map(v => cosineSimilarity(novelty.vec, v)))
+      : undefined
+
     const reflection = await this.reflector.reflect(entry, context)
 
-    const newState = updateState(state, reflection)
+    const newState = updateState(state, reflection, recentCos)
 
     await this.memory.storeEntry(entry)
     await this.memory.storeReflection(reflection)
     await this.memory.saveSelfState(newState)
 
     // --- Сканируем запись на истощённые мотивы ---
-    this.motifTracker.scanEntryWithReflection(entry, [
-      ...(reflection.newInsights || []),
-      ...(reflection.systemTension || [])
-    ])
+    this.motifTracker.scanEntryWithReflection(entry)
     this.motifTracker.save()
 
     await this.publisher.publish(entry, "console")

@@ -3,28 +3,41 @@
 import { SelfState } from "../domain/self-state"
 import { Reflection } from "../domain/reflection"
 
+// [STAGE 3] repetitionSignal — измеряется, а не самооценивается.
+// Раньше: LLM ставила repetitionScore не видя предыдущих текстов (слепа),
+// themeRepeatRatio был exact-match длинных уникальных строк → всегда 0.
+// Теперь: косинус принятой записи к предыдущим (0.75..1.00 → 0..1).
+// Равновесие drift* = 0.08/(1-0.92) = 1.0×signal — линейная и предсказуемая
+// связь: cos 0.80 → drift ~0.20 (phase 2), 0.85 → 0.40 (phase 2-3),
+// 0.90 (ворота gate) → 0.60 (phase 4).
+export function repetitionSignalFromCos(cos: number | undefined): number | null {
+  if (cos === undefined || cos === null || Number.isNaN(cos)) return null
+  return Math.max(0, Math.min(1, (cos - 0.75) / 0.25))
+}
+
 export function updateState(
   prev: SelfState,
-  reflection: Reflection
+  reflection: Reflection,
+  repetitionCos?: number
 ): SelfState {
 
-  // --- Drift (hybrid approach) ---
-  // 1. LLM-based repetition score (0-10)
+  // --- Drift: measured repetition ---
+  // 1. LLM-based repetition score (0-10) — fallback, если нет эмбеддингов
   const repetitionScore = reflection.repetitionScore ?? 5
 
-  // 2. Theme repeat ratio (0-1)
+  // 2. Theme repeat ratio (0-1) — exact-match fallback
   const prevThemes = (prev.themes || []).map(t => t.toLowerCase().trim())
   const newThemes = (reflection.themes || []).map(t => t.toLowerCase().trim())
   const themeRepeats = newThemes.filter(t => prevThemes.includes(t)).length
   const themeRepeatRatio = prevThemes.length > 0 ? themeRepeats / prevThemes.length : 0
 
-  // 3. Combine signals: LLM score (60%) + theme ratio (40%)
-  const repetitionSignal = (repetitionScore / 10) * 0.6 + themeRepeatRatio * 0.4
+  const fallbackSignal = (repetitionScore / 10) * 0.6 + themeRepeatRatio * 0.4
+  const measuredSignal = repetitionSignalFromCos(repetitionCos)
+  const repetitionSignal = measuredSignal ?? fallbackSignal
 
-  // 4. Growth with decay
-  // Слабое затухание и достаточный вес сигнала, чтобы повторения РЕАЛЬНО поднимали
-  // drift → росла narrative-Fase → менялся голос (иначе фаза намертво = 1)
-  const drift = Math.min(1, Math.max(0, prev.drift * 0.92 + repetitionSignal * 0.12))
+  // 3. Growth with decay
+  // Равновесие drift* = repetitionSignal (0.08/(1-0.92) = 1.0)
+  const drift = Math.min(1, Math.max(0, prev.drift * 0.92 + repetitionSignal * 0.08))
 
   // --- Confidence (EMA with drift penalty) ---
   const score = reflection.score ?? 5

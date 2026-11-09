@@ -13,7 +13,12 @@ const MODEL = process.env.OLLAMA_MODEL || "gemma4:31b-cloud"
 export class OllamaClient implements LLMClient {
   async generate(
     prompt: string,
-    options?: { temperature?: number; top_p?: number }
+    options?: {
+      temperature?: number
+      top_p?: number
+      frequency_penalty?: number
+      presence_penalty?: number
+    }
   ): Promise<string> {
     const maxRetries = 3
     const baseDelay = 10000
@@ -36,6 +41,10 @@ export class OllamaClient implements LLMClient {
             messages: [{ role: "user", content: prompt }],
             temperature: options?.temperature ?? 0.85,
             top_p: options?.top_p ?? 0.85,
+            // [STAGE 3] Штрафы за повтор — были потеряны при переходе на
+            // OpenAI-совместимый endpoint (старый клиент слал repeat_penalty 1.1)
+            frequency_penalty: options?.frequency_penalty ?? 0.4,
+            presence_penalty: options?.presence_penalty ?? 0.3,
             stream: false,
           }),
         })
