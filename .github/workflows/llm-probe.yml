@@ -11,24 +11,23 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - name: free models chat
+      - name: quality check
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           cat > probe.mjs <<'EOF'
           import OpenAI from "openai";
           const c = new OpenAI({ apiKey: process.env.OPENROUTER_API_KEY, baseURL: "https://openrouter.ai/api/v1" });
-          const list = await c.models.list();
-          const free = list.data.filter(m => m.id.endsWith(":free")).map(m => m.id);
-          console.log("free models:", free.length);
-          for (const m of free) {
+          const prompt = `Напиши короткий дневниковый_entry (3-4 предложения) от лица женщины-писательницы: зимняя прогулка, конкретная бытовая деталь, без клише. Только текст.`;
+          const cands = ["inclusionai/ling-3.2-flash:free", "nvidia/nemotron-3.5-lightning:free",
+                         "baidu/ernie-5.5-flash-preview:free", "recursive/flint-v1.0:free"];
+          for (const m of cands) {
             try {
-              const r = await c.chat.completions.create({
-                model: m, messages: [{ role: "user", content: "ответь одним словом: жив" }], max_tokens: 5
-              });
-              console.log("OK  ", m, "->", JSON.stringify(r.choices[0]?.message?.content || "").slice(0, 40));
+              const r = await c.chat.completions.create({ model: m, messages: [{ role: "user", content: prompt }], max_tokens: 300 });
+              const txt = r.choices[0]?.message?.content || "(пусто)";
+              console.log(`\n=== ${m} (usage: ${JSON.stringify(r.usage)}) ===\n${txt.slice(0, 500)}`);
             } catch (e) {
-              console.log("FAIL", m, ":", e.status, (e?.error?.message || e.message || "").slice(0, 90));
+              console.log(`\n=== ${m} FAIL: ${e.status} ${(e?.error?.message || e.message || "").slice(0, 150)}`);
             }
           }
           EOF
