@@ -180,26 +180,29 @@ delete process.env.SEASONAL_EMBEDDINGS_PATH
 
 console.log("\n=== 3b. anchorLexicalOverlap: not-verbatim guard ===")
 const liveAll: Entry[] = JSON.parse(fs.readFileSync(path.join(dataDir, "entries.json"), "utf-8"))
-const live16 = liveAll.find(e => (e.createdAt ?? "").toString().startsWith("2026-11-16"))
+const live16 = liveAll.filter(e => (e.createdAt ?? "").toString().startsWith("2026-11-16"))
 const novAnchor = getSeasonalAnchor(new Date(2026, 10, 16))
-console.log("якорь 16.11:", novAnchor.text)
-if (live16) {
-  // запись 16.11 содержит «лужа затянулась первым льдом» — морфологически
-  // близко к якорю: первые/луж совпадут, лед/льд — нет (чередование) → ~0.67
-  const ov = anchorLexicalOverlap((live16 as any).content, novAnchor)
-  console.log("overlap с боевой записью 16.11:", ov)
-  if (ov <= 0) throw new Error("РЕГРЕССИЯ: якорь лексически присутствует, а overlap=0 (метрик сломан)")
-  if (ov > 0.99) throw new Error("РЕГРЕССИЯ: overlap боевой записи = 1 — запись дословно цитирует якорь")
-} else {
-  console.log("  (записи 16.11 нет в корпусе — пропуск)")
+console.log("якорь 16.11:", novAnchor.text, "| записей 16.11 в корпусе:", live16.length)
+// Информационно (без assertion): боевой корпус зависит от того, сколько
+// прогонов CI успели написать запись за этот день, — детерминированные
+// кейсы ниже проверяют метрику, а не корпус.
+for (const e of live16) {
+  console.log("  ", e.id.slice(0, 8), "overlap=", anchorLexicalOverlap((e as any).content, novAnchor))
 }
-// дословное цитирование == максимум
+
+// детерминированные кейсы
 const verbatim = anchorLexicalOverlap("первый лёд в луже у подъезда", { text: "первый лёд в луже" })
-const clean = anchorLexicalOverlap("В-roomе пахло кофе и корицей,-radio орало новости", { text: "первый лёд в луже" })
-console.log("verbatim:", verbatim, "| совсем другая тема:", clean)
+const morph = anchorLexicalOverlap("У аптеки лужа затянулась первым тонким льдом", { text: "первый лёд в луже" })
+const clean = anchorLexicalOverlap("На кухне пахло кофе и корицей, радио орало новости", { text: "первый лёд в луже" })
+console.log("verbatim:", verbatim, "| морфопарафраз:", morph, "| чужая тема:", clean)
+
 if (verbatim < 0.99) throw new Error("РЕГРЕССИЯ: дословное цитирование не ловится (verbatim < 1)")
+// «лужа» и «первым» совпадут по 3-символьному префиксу, «льдом» (через ь) — нет → 0.67
+if (morph !== 0.67) {
+  throw new Error(`РЕГРЕССИЯ: морфопарафраз должен давать 0.67, получил ${morph} (префиксы сломались?)`)
+}
 if (clean > 0) throw new Error("РЕГРЕССИЯ: чужая тема даёт overlap > 0")
-console.log("verbatim ловится, чужая тема — 0 ✓")
+console.log("verbatim ловится, морфология учитывается, чужая тема — 0 ✓")
 
 console.log("\n=== 4. P0: идемпотентность сканера (двойной счёт) ===")
 // [СТАРИННЫЙ БАГ] scanEntryWithReflection не маркил id в scannedIds.
