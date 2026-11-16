@@ -71,18 +71,26 @@ async function main(): Promise<void> {
   const anchors: { [text: string]: number[] } = {}
   let dim = 0
 
-  for (let i = 0; i < texts.length; i++) {
-    const t = texts[i]
-    const vec = await client.embed(t, inputType)
-    if (!vec?.length) throw new Error(`пустой эмбеддинг для «${t}»`)
-    dim = vec.length
-    anchors[t] = vec
-    if ((i + 1) % 10 === 0) console.log(`  ${i + 1}/${texts.length}`)
+  // ОДИН батч-запрос (Voyage: до 128 текстов за раз) — бесплатный тариф
+  // даёт 3 RPM, и 63 одиночных запроса упираются в лимит.
+  const BATCH = 128
+  for (let i = 0; i < texts.length; i += BATCH) {
+    const chunk = texts.slice(i, i + BATCH)
+    console.log(`батч ${i / BATCH + 1}: ${chunk.length} якорей...`)
+    const vecs = await client.embedBatch(chunk, inputType)
+    if (vecs.length !== chunk.length) {
+      throw new Error(`получили ${vecs.length} векторов из ${chunk.length}`)
+    }
+    chunk.forEach((t, j) => {
+      if (!vecs[j]?.length) throw new Error(`пустой эмбеддинг для «${t}»`)
+      dim = vecs[j].length
+      anchors[t] = vecs[j]
+    })
   }
 
   const out: EmbeddingsFile = { model, dim, inputType, poolHash: poolHash(), anchors }
   fs.writeFileSync(EMBEDDINGS_PATH, JSON.stringify(out, null, 2) + "\n")
-  console.log(`записан ${EMBEDDINGS_PATH} | model=${model} dim=${dim} hash=${out.poolHash}`)
+  console.log(`записан ${EMBEDDINGS_PATH} | model=${model} dim=${dim} hash=${out.poolHash} якорей=${texts.length}`)
 }
 
 main().catch(e => {
