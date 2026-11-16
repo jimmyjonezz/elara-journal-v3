@@ -12,14 +12,15 @@ import { SimpleEvaluator } from "./services/evaluator.service"
 import { ConsolePublisher } from "./services/publisher.service"
 
 import { OllamaClient } from "./infra/llm/ollama.client"
+import { OpenCodeClient } from "./infra/llm/opencode.client"
 import { VoyageClient } from "./infra/llm/voyage.client"
 
 import { FilePromptManager } from "./services/prompt.service"
 
 async function main() {
   // --- LLM ---
-  //const llm = new OpenCodeClient()
-  const llm = new OllamaClient()
+  const llm = new OpenCodeClient()
+  //const llm = new OllamaClient()  // Ollama Cloud 402 (нет кредитов) — вернуть при пополнении
 
   // --- Prompts ---
   const prompts = new FilePromptManager()
