@@ -6,18 +6,32 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe opencode models
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - name: Probe opencode models via openai SDK
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
         run: |
-          echo "=== /v1/models ==="
-          curl -s -m 30 https://opencode.ai/zen/v1/models -H "Authorization: Bearer [REDACTED]" | head -c 3000
-          echo
-          echo "=== chat probes ==="
-          for m in ling-3.0-flash ling-3.0-fast ling-4.0-flash zen-1-mini gpt-oss:20b gemma4:31b kimi-k3 llama-3.3-70b qwen3-coder deepseek-v4.1-flash glm-5.3-flash minimax-m3.1-flash; do
-            code=$(curl -s -o /tmp/out -w "%{http_code}" -X POST https://opencode.ai/zen/v1/chat/completions \
-              -H "Authorization: Bearer [REDACTED]" \
-              -H "Content-Type: application/json" \
-              -d "{\"model\":\"$m\",\"messages\":[{\"role\":\"user\",\"content\":\"жив?\"}],\"max_tokens\":3}" --max-time 40)
-            echo "$m -> $code  $(head -c 120 /tmp/out | tr -d '\n')"
-          done
+          cat > probe.mjs <<'EOF'
+          import OpenAI from "openai";
+          const c = new OpenAI({ apiKey: process.env.OPENCODE_API_KEY, baseURL: "https://opencode.ai/zen/v1" });
+          try {
+            const list = await c.models.list();
+            for (const m of list.data) console.log("MODEL:", m.id);
+          } catch (e) { console.log("LIST FAIL:", e.status, e?.error?.message || e.message); }
+          const cands = ["ling-3.0-flash", "ling-4.0-flash", "zen-1-mini", "ling-3.0-flash-fin-free",
+                         "gpt-oss:20b", "kimi-k3", "gemma4:31b", "glm-5.3-flash", "deepseek-v4.1-flash",
+                         "minimax-m3.1-flash", "qwen3-coder", "llama-3.3-70b"];
+          for (const m of cands) {
+            try {
+              const r = await c.chat.completions.create({ model: m, messages: [{ role: "user", content: "жив?" }] });
+              console.log(`OK ${m}:`, JSON.stringify(r.choices[0]?.message?.content || "").slice(0, 80));
+            } catch (e) {
+              console.log(`FAIL ${m}:`, e.status, (e?.error?.message || e.message || "").slice(0, 120));
+            }
+          }
+          EOF
+          node probe.mjs
