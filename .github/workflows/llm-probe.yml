@@ -1,0 +1,23 @@
+name: LLM probe
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe opencode models
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        run: |
+          echo "=== /v1/models ==="
+          curl -s -m 30 https://opencode.ai/zen/v1/models -H "Authorization: Bearer [REDACTED]" | head -c 3000
+          echo
+          echo "=== chat probes ==="
+          for m in ling-3.0-flash ling-3.0-fast ling-4.0-flash zen-1-mini gpt-oss:20b gemma4:31b kimi-k3 llama-3.3-70b qwen3-coder deepseek-v4.1-flash glm-5.3-flash minimax-m3.1-flash; do
+            code=$(curl -s -o /tmp/out -w "%{http_code}" -X POST https://opencode.ai/zen/v1/chat/completions \
+              -H "Authorization: Bearer [REDACTED]" \
+              -H "Content-Type: application/json" \
+              -d "{\"model\":\"$m\",\"messages\":[{\"role\":\"user\",\"content\":\"жив?\"}],\"max_tokens\":3}" --max-time 40)
+            echo "$m -> $code  $(head -c 120 /tmp/out | tr -d '\n')"
+          done
