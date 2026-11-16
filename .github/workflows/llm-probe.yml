@@ -10,7 +10,7 @@ jobs:
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
         run: |
-          for m in mistral-large-4 nemotron-3-super mimo-v2.6-pro kimi-k2.6 kimi-k3.1-pro deepseek-v4.1-flash nemotron-3-ultra mimo-v2.6-flash kimi-k3 deepseek-v4.1-flash:1017 kimi-k2.7-code deepseek-v4-pro:0813 glm-5.3-flash glm-5.3 glm-5.2 gpt-oss:20b muse-spark-open inkling-2-small gemma4:31b clef:27b beam gpt-oss:120b minimax-m3.1-flash minimax-m3; do
+          for m in gemma4:31b-cloud kimi-k3 gpt-oss:20b deepseek-v4.1-flash minimax-m3.1-flash glm-5.3-flash; do
             code=$(curl -s -o /tmp/out -w "%{http_code}" -X POST https://ollama.com/v1/chat/completions \
               -H "Authorization: Bearer [REDACTED]" \
               -H "Content-Type: application/json" \
