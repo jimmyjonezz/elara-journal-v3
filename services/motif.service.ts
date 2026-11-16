@@ -140,11 +140,14 @@ function matchWord(content: string, pattern: string): boolean {
 }
 
 export class MotifTracker {
-  private filePath = path.resolve("data/motif-state.json")
+  private filePath: string
 
   private state: MotifState
 
-  constructor() {
+  // [P0 ТЕСТ] filePath инжектируется — тесты гоняют два прогона в temp-файле,
+  // не трогая боевой data/motif-state.json
+  constructor(filePath?: string) {
+    this.filePath = filePath ?? path.resolve("data/motif-state.json")
     this.state = this.read()
   }
 
@@ -240,6 +243,13 @@ export class MotifTracker {
 
   scanEntryWithReflection(entry: Entry): void {
     this.scanEntry(entry)
+    // [P0 FIX] Живой скан тоже должен маркать id — иначе следующий CI-прогон
+    // увидит эту запись в backfill как свежую и посчитает второй раз
+    // (totalScanned 23 vs scannedIds 22 — каждый новый entry двойной).
+    const scanned = new Set(this.state.scannedIds ?? [])
+    if (!scanned.has(entry.id)) {
+      this.state.scannedIds = [...scanned, entry.id]
+    }
     // [STAGE 2] Эволюция-скидка убрана: критик обсуждает именно образы
     // аттрактора (соль/капля), и скидка −3 выводила их из {{avoid}},
     // хотя это самые затёртые мотивы (writing_process снижался 22/22).
@@ -252,7 +262,12 @@ export class MotifTracker {
   getExhaustedMotifs(): string[] {
     return Object.values(this.state.motifs)
       .filter(m => m.exhaustion >= EXHAUSTION_THRESHOLD)
-      .sort((a, b) => b.exhaustion - a.exhaustion)
+      // [P2 FIX] Tiebreaker по count: раньше при равном exhaustion=10 (а их
+      // 8-10 штук на корпусе) порядок задаётся массивом MOTIF_DEFINITIONS —
+      // top-3 зависел от того, кто первый объявлен, а не от повторов.
+      // Третий ключ — id: при полном равенстве порядок детерминирован,
+      // snapshot-тесты не мигают между запусками (требование ревью ACPBox).
+      .sort((a, b) => b.exhaustion - a.exhaustion || b.count - a.count || a.id.localeCompare(b.id))
       .map(m => `[ПОВТОР МОТИВА] ${m.label} — уже использован ${m.count} раз(а)`)
   }
 
