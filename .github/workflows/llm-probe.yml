@@ -22,9 +22,9 @@ jobs:
             const list = await c.models.list();
             for (const m of list.data) console.log("MODEL:", m.id);
           } catch (e) { console.log("LIST FAIL:", e.status, e?.error?.message || e.message); }
-          const cands = ["ling-3.0-flash", "ling-4.0-flash", "zen-1-mini", "ling-3.0-flash-fin-free",
-                         "gpt-oss:20b", "kimi-k3", "gemma4:31b", "glm-5.3-flash", "deepseek-v4.1-flash",
-                         "minimax-m3.1-flash", "qwen3-coder", "llama-3.3-70b"];
+          const cands = ["mimo-v2.6-flash-free", "deepseek-v4.1-flash-free", "glm-5.3-flash-free", "longcat-2.5-free",
+                         "iceman-free", "inkling-2-small-free", "beam-free", "flint-40b-free",
+                         "nemotron-3.5-super-vl-free", "nemotron-3.5-lightning-free", "minimax-m3.1-flash-free"];
           for (const m of cands) {
             try {
               const r = await c.chat.completions.create({ model: m, messages: [{ role: "user", content: "жив?" }] });
