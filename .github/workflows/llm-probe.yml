@@ -6,22 +6,28 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Debug env
+      - name: Probe openrouter
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           python3 - <<'EOF'
           import os, json, urllib.request, urllib.error
           key = os.environ["OPENROUTER_API_KEY"]
+          UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
           def call(url, headers, body=None):
               req = urllib.request.Request(url, data=json.dumps(body).encode() if body else None, headers=headers)
               try:
-                  with urllib.request.urlopen(req, timeout=90) as r:
-                      return r.status, r.read()[:600].decode(errors="replace")
+                  with urllib.request.urlopen(req, timeout=120) as r:
+                      return r.status, r.read()[:500].decode(errors="replace")
               except urllib.error.HTTPError as e:
-                  return e.code, e.read()[:600].decode(errors="replace")
+                  return e.code, e.read()[:500].decode(errors="replace")
               except Exception as e:
                   return None, str(e)
-          # доходит ли Authorization headers до сервера вообще?
-          print("httpbin:", call("https://httpbin.org/get", {"Authorization": f"Bearer [REDACTED]"}))
+          base = {"Authorization": f"Bearer [REDACTED]", "User-Agent": UA}
+          print("/key browserUA:", call("https://openrouter.ai/api/v1/key", base))
+          h = dict(base); h["Content-Type"] = "application/json"
+          h["HTTP-Referer"] = "https://elara-journal"; h["X-Title"] = "elara"
+          body = {"model": "meta-llama/llama-3.2-3b-instruct:free",
+                  "messages": [{"role": "user", "content": "ответь одним словом: жив"}], "max_tokens": 5}
+          print("chat browserUA:", call("https://openrouter.ai/api/v1/chat/completions", h, body))
           EOF
