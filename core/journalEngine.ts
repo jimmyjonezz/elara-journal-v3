@@ -11,7 +11,7 @@ import { normalizeEmbedding } from "../utils/embedding.utils"
 import { cosineSimilarity } from "../utils/vector.utils"
 import { checkConsequences } from "../services/evaluator.service"
 import { MotifTracker } from "../services/motif.service"
-import { getSeasonalAnchor, anchorHit } from "../services/seasonal.service"
+import { getSeasonalAnchor, anchorHit, anchorLexicalOverlap } from "../services/seasonal.service"
 
 export class JournalEngine {
   private motifTracker = new MotifTracker()
@@ -150,12 +150,24 @@ export class JournalEngine {
 
     await this.publisher.publish(entry, "console")
 
-    // [STAGE 4] Shadow-режим: логируем попадание якоря, не роняем запись.
-    // Hard gate — только если hit-rate ≥90% на 7+ прогонах (пока данных нет)
-    const hit = anchorHit(entry.content, context.seasonalAnchor)
+    // [STAGE 4] Shadow-режим: семантическое попадание якоря, лог не gate.
+    // Вектор записи уже посчитан (novelty.vec) — 0 доп. запросов к Voyage.
+    // Hard gate НЕ включён: калибровка порога на 1 positive control — это
+    // подгонка (требование ревью ACPBox). Набираем shadow-историю.
+    // unavailable ≠ miss: нет эмбеддингов — не считается промахом.
+    const anchorResult = anchorHit(novelty.vec, context.seasonalAnchor)
+    const overlap = anchorLexicalOverlap(entry.content, context.seasonalAnchor)
     console.log(
-      `[ANCHOR] seasonal="${context.seasonalAnchor.text}" hit=${hit}`
+      `[ANCHOR] seasonal="${context.seasonalAnchor.text}" status=${anchorResult.status}` +
+        (anchorResult.score !== undefined ? ` score=${anchorResult.score}` : "") +
+        ` overlap=${overlap} model=${anchorResult.model ?? "-"}`
     )
+    if (overlap >= 0.6) {
+      console.warn(
+        `[ANCHOR] overlap=${overlap} — якорь цитируется почти дословно, ` +
+          "риск нового шаблона (см. запрет в промпте)"
+      )
+    }
 
     // [STAGE 1] Health check: успешный цикл обязан добавить запись за сегодня
     const after = await this.memory.getRecent(1)

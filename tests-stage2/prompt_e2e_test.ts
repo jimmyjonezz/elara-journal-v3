@@ -1,12 +1,13 @@
 // E2E сборка промпта: проверка плейсхолдеров на реальных данных
 import * as fs from "fs"
+import * as path from "path"
 import { AIGenerator } from "../services/generator.service"
 import { FilePromptManager } from "../services/prompt.service"
 import { getSeasonalAnchor } from "../services/seasonal.service"
 import { Context } from "../domain/context"
 import { mmrSelect } from "../utils/vector.utils"
 
-const dataDir = "/data/data/com.termux/files/home/elara-journal-v3/data"
+const dataDir = path.resolve(__dirname, "..", "..", "data")
 
 async function main() {
   const entries: any[] = JSON.parse(fs.readFileSync(dataDir + "/entries.json", "utf-8"))

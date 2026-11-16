@@ -3,7 +3,7 @@ import { EmbeddingService } from "../../interfaces/embedding"
 export class VoyageClient implements EmbeddingService {
   private apiKey = process.env.VOYAGE_API_KEY!
 
-  async embed(text: string): Promise<number[]> {
+  async embed(text: string, inputType: "query" | "document" = "document"): Promise<number[]> {
     const maxRetries = 3
     const delay = 10000
 
@@ -17,7 +17,8 @@ export class VoyageClient implements EmbeddingService {
           },
           body: JSON.stringify({
             input: text,
-            model: process.env.VOYAGE_MODEL || "voyage-4-lite"
+            model: process.env.VOYAGE_MODEL || "voyage-4-lite",
+            input_type: inputType
           })
         })
 

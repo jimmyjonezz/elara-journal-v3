@@ -1,122 +1,188 @@
 // services/seasonal.service.ts
+//
+// [STAGE 4] Внешний вход: seasonal anchor. Контент живёт в данных:
+//   data/seasonal-pools.json        — 63 якоря по месяцам (правятся коммитом в data)
+//   data/seasonal-embeddings.json   — предрассчитанные эмбеддинги якорей
+// Логика здесь: выбрать якорь по дате и оценить попадание семантикой.
+//
+// [REFACTOR 2026-11-16] Стем-матчинг (keywords + matchStem) выпилен: на русском
+// стемы давали ложные срабатывания (пар→паралич, стол→столько, холод→холодильник),
+// и каждый новый корпус требовал правки .ts-файла. Попадание считается косинусом
+// между эмбеддингом записи (уже считается для novelty gate — 0 доп. запросов)
+// и предрассчитанным эмбеддингом якоря.
 
-// [STAGE 4] Внешний якорь: сезонные детали месяца.
-// Источник — new Date(), детерминировано, без API (нет failure mode).
-// Пул на месяц большой, ротация по дню месяца — иначе 30 дней
-// «мёрзлых стёкол» стали бы новым аттрактором (правка второго голоса).
+import * as fs from "fs"
+import * as path from "path"
+import { cosineSimilarity } from "../utils/vector.utils"
 
 export interface SeasonalAnchor {
   text: string
-  keywords: string[]
 }
 
-const MONTH_POOLS: Record<number, { text: string; keywords: string[] }[]> = {
-  0: [
-    { text: "мороз узорами на стекле", keywords: ["мороз", "узор", "стекл"] },
-    { text: "хруст снега под подошвами", keywords: ["хруст", "снег"] },
-    { text: "тёмное небо в пять вечера", keywords: ["небо", "вечер", "тёмн"] },
-    { text: "пар изо рта на рынке", keywords: ["пар", "рынок"] },
-    { text: "ёлки в очереди за елками", keywords: ["ёлк"] }
-  ],
-  1: [
-    { text: "метель за окном", keywords: ["метель", "окн"] },
-    { text: "протоптанные тропинки в парке", keywords: ["тропинк", "парк"] },
-    { text: "иней на проводах", keywords: ["ине", "провод"] },
-    { text: "тишина после снегопада", keywords: ["тишин", "снегопад"] },
-    { text: "тёплый свет кафе", keywords: ["свет", "кафе", "тёпл"] }
-  ],
-  2: [
-    { text: "капель с карнизов", keywords: ["капел", "карниз"] },
-    { text: "чёрный мартовский снег", keywords: ["снег", "март"] },
-    { text: "первые проталины у дорог", keywords: ["проталин", "дорог"] },
-    { text: "сырой ветер с реки", keywords: ["ветер", "рек", "сыр"] },
-    { text: "отражения луж в фонарях", keywords: ["луж", "фонар", "отражен"] }
-  ],
-  3: [
-    { text: "набухшие почки на ветках", keywords: ["почк", "ветк"] },
-    { text: "первая зелень во дворе", keywords: ["зелен", "двор"] },
-    { text: "длинный закат", keywords: ["закат"] },
-    { text: "запах влажной земли", keywords: ["запах", "земл", "влажн"] },
-    { text: "грачи на проводах", keywords: ["грач", "провод"] }
-  ],
-  4: [
-    { text: "майская гроза", keywords: ["гроз", "май"] },
-    { text: "сирень у подъезда", keywords: ["сирен", "подъезд"] },
-    { text: "светлые вечера", keywords: ["свет", "вечер"] },
-    { text: "одуванчики на газоне", keywords: ["одуванчик", "газон"] },
-    { text: "тёплый дождь", keywords: ["дожд", "тёпл"] }
-  ],
-  5: [
-    { text: "знойный полдень", keywords: ["зной", "полдень"] },
-    { text: "запах нагретого асфальта", keywords: ["асфальт", "запах"] },
-    { text: "белые ночи", keywords: ["ночи", "бел"] },
-    { text: "тень от листвы на столе", keywords: ["тен", "листв", "стол"] },
-    { text: "купол неба после дождя", keywords: ["небо", "дожд"] }
-  ],
-  6: [
-    { text: "сухая июльская жара", keywords: ["жар", "июл", "сух"] },
-    { text: "кузнечики в траве", keywords: ["кузнечик", "трав"] },
-    { text: "пыль на дороге", keywords: ["пыл", "дорог"] },
-    { text: "душный вечер", keywords: ["душн", "вечер"] },
-    { text: "зрелая малина", keywords: ["малин"] }
-  ],
-  7: [
-    { text: "сухие колосья", keywords: ["колось", "сух"] },
-    { text: "тихий августовский вечер", keywords: ["вечер", "август", "тих"] },
-    { text: "паутина в углах", keywords: ["паутин", "угл"] },
-    { text: "звёзды над крышей", keywords: ["звезд", "крыш"] },
-    { text: "гроза на горизонте", keywords: ["гроз", "горизонт"] }
-  ],
-  8: [
-    { text: "желтеющая берёза у окна", keywords: ["берёз", "окн", "желт"] },
-    { text: "костёр из листьев", keywords: ["костёр", "листв"] },
-    { text: "прозрачный утренний воздух", keywords: ["воздух", "утр", "прозрачн"] },
-    { text: "туман над рекой", keywords: ["туман", "рек"] },
-    { text: "грибы в корзинке соседа", keywords: ["гриб", "сосед"] }
-  ],
-  9: [
-    { text: "моросящий дождь весь день", keywords: ["дожд", "морос"] },
-    { text: "тёмные лужи у тротуара", keywords: ["луж", "тротуар", "тёмн"] },
-    { text: "запах прелых листьев", keywords: ["запах", "листв", "прел"] },
-    { text: "низкие свинцовые тучи", keywords: ["туч", "свинц"] },
-    { text: "мокрые вороны", keywords: ["ворон", "мокр"] }
-  ],
-  10: [
-    { text: "первый лёд в луже", keywords: ["лёд", "луж"] },
-    { text: "тёмные вечера в пять", keywords: ["вечер", "пять", "тёмн"] },
-    { text: "мёрзлые стёкла автобусов", keywords: ["стекл", "автобус", "мёрз"] },
-    { text: "запах холодного дуба", keywords: ["запах", "холод", "дуб"] },
-    { text: "иней на крыльце", keywords: ["ине", "крыльц"] },
-    { text: "сизый рассвет", keywords: ["рассвет", "сиз"] },
-    { text: "ветер ломает последние листья", keywords: ["ветер", "листв"] },
-    { text: "тёплый свет в окне напротив", keywords: ["свет", "окн", "тёпл"] }
-  ],
-  11: [
-    { text: "снег идёт с утра", keywords: ["снег", "утр"] },
-    { text: "иней на ветках ёлки", keywords: ["ине", "ветк", "ёлк"] },
-    { text: "короткий декабрьский день", keywords: ["день", "декабр", "коротк"] },
-    { text: "гирлянды на окнах", keywords: ["гирлянд", "окн"] },
-    { text: "пар из чайника на кухне", keywords: ["пар", "чайник", "кухн"] }
-  ]
+interface PoolsFile {
+  [month: string]: SeasonalAnchor[]
 }
 
-// Нормализация ё→е: иначе «стёкла» ≠ «стекл» (правка второго голоса)
-function normalize(s: string): string {
-  return s.replace(/ё/g, "е").toLowerCase()
+// Пути переопределяются через env — тесты и CI-probe гоняют на своих файлах,
+// боевое окружение использует data/ по умолчанию.
+// ВАЖНО: читаются ЛЕНИВО (в момент вызова), а не на импорте модуля —
+// иначе env-override, выставленный тестом после import, не подхватится.
+function poolsPath(): string {
+  return process.env.SEASONAL_POOLS_PATH || path.resolve("data", "seasonal-pools.json")
+}
+function embeddingsPath(): string {
+  return process.env.SEASONAL_EMBEDDINGS_PATH || path.resolve("data", "seasonal-embeddings.json")
 }
 
+let poolsCache: Record<number, SeasonalAnchor[]> | null = null
+
+// для тестов: сброс кэшей между сценариями
+export function _resetSeasonalCache(): void {
+  poolsCache = null
+  embCache = null
+}
+
+// [REVIEW: валидатор] Битый data-файл должен валиться громко, а не тихо
+// оставлять дневник без якорей.
+export function loadSeasonalPools(): Record<number, SeasonalAnchor[]> {
+  if (poolsCache) return poolsCache
+
+  const parsed: PoolsFile = JSON.parse(fs.readFileSync(poolsPath(), "utf-8"))
+  const pools: Record<number, SeasonalAnchor[]> = {}
+
+  for (const [key, pool] of Object.entries(parsed)) {
+    const month = Number(key)
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+      throw new Error(`seasonal-pools.json: ключ «${key}» не месяц 1..12`)
+    }
+    if (!Array.isArray(pool) || !pool.length) {
+      throw new Error(`seasonal-pools.json: месяц ${month} пуст или не массив`)
+    }
+    const seen = new Set<string>()
+    for (const item of pool) {
+      if (!item?.text || !item.text.trim()) {
+        throw new Error(`seasonal-pools.json: пустой text в месяце ${month}`)
+      }
+      if (seen.has(item.text)) {
+        throw new Error(`seasonal-pools.json: дубль «${item.text}» в месяце ${month}`)
+      }
+      seen.add(item.text)
+    }
+    pools[month] = pool
+  }
+
+  poolsCache = pools
+  return pools
+}
+
+// Якорь выбирается ДАТОЙ (внешний вход), а не похожестью — иначе это
+// скрытый контур обратной связи. Формулу ротации не меняем
+// (date.getDate() % pool.length): от неё зависит, какой якорь в какой день
+// подавался в shadow-истории, и калибровочный positive control 16.11.
 export function getSeasonalAnchor(date = new Date()): SeasonalAnchor {
-  const pool = MONTH_POOLS[date.getMonth()] ?? MONTH_POOLS[0]
-  const item = pool[date.getDate() % pool.length]
+  const pools = loadSeasonalPools()
+  const pool = pools[date.getMonth() + 1] ?? pools[1]
+  if (!pool) throw new Error("seasonal-pools.json: нет ни одного месяца")
+  return pool[date.getDate() % pool.length]
+}
+
+// ---------- Семантическое попадание ----------
+
+export interface AnchorHitResult {
+  // hit — якорь присутствует; miss — нет; unavailable — нет эмбеддингов
+  // (нет файла, нет вектора якоря или вектора записи). Сбой ≠ промах:
+  // unavailable не должен учитываться как miss при подсчёте hit-rate.
+  status: "hit" | "miss" | "unavailable"
+  score?: number
+  model?: string
+}
+
+interface EmbeddingsFile {
+  model: string
+  dim: number
+  inputType: string
+  poolHash: string
+  anchors: { [text: string]: number[] }
+}
+
+let embCache: EmbeddingsFile | null = null
+
+export function loadAnchorEmbeddings(): EmbeddingsFile | null {
+  if (embCache) return embCache
+  try {
+    const parsed = JSON.parse(fs.readFileSync(embeddingsPath(), "utf-8"))
+    if (parsed?.model && parsed?.dim && parsed?.anchors) {
+      embCache = parsed
+      return parsed
+    }
+  } catch {
+    // файла нет или битый — unavailable, shadow-режим это переварит
+  }
+  return null
+}
+
+// Порог ПРОБНЫЙ — не калиброван (Voyage-ключ только в CI, калибровка
+// отдельным probe-прогоном). В shadow-логе всегда пишется голый score,
+// так что бинарный verdict можно поменять без потери данных.
+const PROVISIONAL_THRESHOLD = 0.3
+
+export function anchorHit(
+  entryVec: number[] | undefined | null,
+  anchor: SeasonalAnchor
+): AnchorHitResult {
+  if (!entryVec?.length) return { status: "unavailable" }
+
+  const emb = loadAnchorEmbeddings()
+  if (!emb) return { status: "unavailable" }
+
+  const anchorVec = emb.anchors[anchor.text]
+  if (!anchorVec?.length) {
+    // в файле эмбеддингов нет этого якоря — пулы обновили, а precalc не отработал
+    console.warn(`[ANCHOR] нет эмбеддинга для «${anchor.text}» — нужен precalc`)
+    return { status: "unavailable" }
+  }
+
+  const score = cosineSimilarity(entryVec, anchorVec)
   return {
-    text: item.text,
-    keywords: item.keywords.map(normalize)
+    status: score >= PROVISIONAL_THRESHOLD ? "hit" : "miss",
+    score: +score.toFixed(3),
+    model: emb.model
   }
 }
 
-// Проверка попадания якоря в текст (для shadow-режима: лог, не gate)
-export function anchorHit(content: string, anchor: SeasonalAnchor): boolean {
-  const normalized = normalize(content)
-  // корни длиннее 3 символов; ё→е нормализовано в обоих случаях
-  return anchor.keywords.some(k => k.length >= 4 && normalized.includes(k))
+// Лексическое пересечение (not-verbatim guard): якорь не должен стать
+// новым шаблоном, который копируется дословно или почти дословно.
+// Считаем долю знаменательных слов якоря, совпавших со словами записи.
+//
+// [ПОЧЕМУ 3-СИМВОЛЬНЫЕ ПРИставки] Полные словоформы не ловят морфологию:
+// «луже» vs «лужу» → 0 при реально присутствующей теме. Префикс 3 символа
+// покрывает падежи/спряжения («луж» == «луж»). Ограничение: чередования
+// типа лед/льд не ловятся (метрик предупреждающий, не гейт — семантика
+// ловится косинусом).
+const STOPWORDS_RU = new Set([
+  "на", "в", "с", "по", "у", "к", "из", "от", "до", "за", "под", "над", "об", "о", "и", "не", "а", "но", "это", "тот"
+])
+
+function prefix3(w: string): string {
+  return w.slice(0, 3)
+}
+
+export function anchorLexicalOverlap(content: string, anchor: SeasonalAnchor): number {
+  const words = anchor.text
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .split(/[^а-я]+/)
+    .filter(w => w.length >= 3 && !STOPWORDS_RU.has(w))
+    .map(prefix3)
+  if (!words.length) return 0
+
+  const text = content
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .split(/[^а-я]+/)
+    .filter(w => w.length >= 3)
+    .map(prefix3)
+  const textSet = new Set(text)
+  const hit = words.filter(p => textSet.has(p)).length
+  return +(hit / words.length).toFixed(2)
 }
