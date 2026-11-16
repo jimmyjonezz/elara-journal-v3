@@ -16,4 +16,5 @@ jobs:
               -H "Content-Type: application/json" \
               -d "{\"model\":\"$m\",\"messages\":[{\"role\":\"user\",\"content\":\"жив?\"}],\"max_tokens\":3}" --max-time 40)
             echo "$m -> $code"
+            head -c 300 /tmp/out; echo
           done
