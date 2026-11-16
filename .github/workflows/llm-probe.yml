@@ -11,29 +11,25 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - name: openai SDK
+      - name: free models chat
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           cat > probe.mjs <<'EOF'
           import OpenAI from "openai";
           const c = new OpenAI({ apiKey: process.env.OPENROUTER_API_KEY, baseURL: "https://openrouter.ai/api/v1" });
-          try {
-            const r = await c.chat.completions.create({
-              model: "meta-llama/llama-3.2-3b-instruct:free",
-              messages: [{ role: "user", content: "ответь одним словом: жив" }], max_tokens: 5
-            });
-            console.log("OK SDK:", JSON.stringify(r.choices[0]?.message?.content));
-          } catch (e) {
-            console.log("FAIL SDK:", e.status, (e?.error?.message || e.message || "").slice(0, 200));
-          }
-          // сравнение: мусорный ключ — какой ответ на него?
-          const bad = new OpenAI({ apiKey: "sk-or-invalid", baseURL: "https://openrouter.ai/api/v1" });
-          try {
-            await bad.chat.completions.create({ model: "meta-llama/llama-3.2-3b-instruct:free", messages: [{ role: "user", content: "x" }], max_tokens: 1 });
-            console.log("BAD KEY: приняли?!");
-          } catch (e) {
-            console.log("BAD KEY FAIL:", e.status, (e?.error?.message || e.message || "").slice(0, 150));
+          const list = await c.models.list();
+          const free = list.data.filter(m => m.id.endsWith(":free")).map(m => m.id);
+          console.log("free models:", free.length);
+          for (const m of free) {
+            try {
+              const r = await c.chat.completions.create({
+                model: m, messages: [{ role: "user", content: "ответь одним словом: жив" }], max_tokens: 5
+              });
+              console.log("OK  ", m, "->", JSON.stringify(r.choices[0]?.message?.content || "").slice(0, 40));
+            } catch (e) {
+              console.log("FAIL", m, ":", e.status, (e?.error?.message || e.message || "").slice(0, 90));
+            }
           }
           EOF
           node probe.mjs
