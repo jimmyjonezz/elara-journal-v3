@@ -8,8 +8,8 @@
         "крупин\\w*",
         "налёт\\w*"
       ],
-      "count": 15,
-      "exhaustion": 10
+      "count": 16,
+      "exhaustion": 9
     },
     "old_woman": {
       "id": "old_woman",
@@ -20,7 +20,7 @@
         "старая\\w*\\s*женщин\\w*"
       ],
       "count": 13,
-      "exhaustion": 10
+      "exhaustion": 9
     },
     "boat_shore": {
       "id": "boat_shore",
@@ -32,7 +32,7 @@
         "набережн\\w*"
       ],
       "count": 14,
-      "exhaustion": 10
+      "exhaustion": 9
     },
     "drop_water": {
       "id": "drop_water",
@@ -42,8 +42,8 @@
         "капае\\w*",
         "капнул\\w*"
       ],
-      "count": 3,
-      "exhaustion": 4.5
+      "count": 4,
+      "exhaustion": 6
     },
     "white_stripe": {
       "id": "white_stripe",
@@ -55,7 +55,7 @@
         "метк\\w*"
       ],
       "count": 7,
-      "exhaustion": 10
+      "exhaustion": 9
     },
     "letter_k": {
       "id": "letter_k",
@@ -67,7 +67,7 @@
         "букв\\w*\\s*«?к»?"
       ],
       "count": 13,
-      "exhaustion": 10
+      "exhaustion": 9
     },
     "coffee_tea": {
       "id": "coffee_tea",
@@ -79,8 +79,8 @@
         "чашк\\w*",
         "стакан\\w*"
       ],
-      "count": 8,
-      "exhaustion": 10
+      "count": 9,
+      "exhaustion": 9
     },
     "window_light": {
       "id": "window_light",
@@ -92,7 +92,7 @@
         "закат\\w*",
         "свет\\w*"
       ],
-      "count": 8,
+      "count": 9,
       "exhaustion": 10
     },
     "phone_call": {
@@ -106,7 +106,7 @@
         "позвон\\w*"
       ],
       "count": 3,
-      "exhaustion": 4.5
+      "exhaustion": 4.05
     },
     "door_entrance": {
       "id": "door_entrance",
@@ -117,7 +117,7 @@
         "порог\\w*",
         "коридор\\w*"
       ],
-      "count": 7,
+      "count": 9,
       "exhaustion": 10
     },
     "bed_sleep": {
@@ -133,7 +133,7 @@
         "спал\\w*"
       ],
       "count": 6,
-      "exhaustion": 9
+      "exhaustion": 8.1
     },
     "writing_process": {
       "id": "writing_process",
@@ -148,7 +148,7 @@
         "письмо\\w*",
         "запис\\w*"
       ],
-      "count": 13,
+      "count": 15,
       "exhaustion": 10
     },
     "rain_weather": {
@@ -163,7 +163,7 @@
         "сырост\\w*"
       ],
       "count": 3,
-      "exhaustion": 4.5
+      "exhaustion": 4.05
     },
     "dream_letters": {
       "id": "dream_letters",
@@ -175,8 +175,8 @@
         "вяз[ьи]\\w*",
         "трещин\\w*"
       ],
-      "count": 19,
-      "exhaustion": 10
+      "count": 20,
+      "exhaustion": 9
     },
     "whispers_voice": {
       "id": "whispers_voice",
@@ -189,7 +189,7 @@
         "дыхан\\w*",
         "дыш\\w*"
       ],
-      "count": 12,
+      "count": 14,
       "exhaustion": 10
     },
     "city_sounds": {
@@ -202,7 +202,7 @@
         "шум\\w*",
         "машин\\w*"
       ],
-      "count": 8,
+      "count": 10,
       "exhaustion": 10
     },
     "food_meal": {
@@ -215,7 +215,7 @@
         "ел[аи]",
         "хлеб\\w*"
       ],
-      "count": 10,
+      "count": 11,
       "exhaustion": 10
     },
     "stare_observation": {
@@ -229,7 +229,7 @@
         "смотрит\\w*"
       ],
       "count": 6,
-      "exhaustion": 9
+      "exhaustion": 8.1
     },
     "mom_family": {
       "id": "mom_family",
@@ -241,7 +241,7 @@
         "родственник\\w*"
       ],
       "count": 6,
-      "exhaustion": 9
+      "exhaustion": 8.1
     },
     "cold_warm": {
       "id": "cold_warm",
@@ -254,7 +254,7 @@
         "зябк\\w*"
       ],
       "count": 10,
-      "exhaustion": 10
+      "exhaustion": 9
     },
     "memory_forget": {
       "id": "memory_forget",
@@ -265,8 +265,8 @@
         "вспомн\\w*",
         "помн\\w*"
       ],
-      "count": 13,
-      "exhaustion": 10
+      "count": 14,
+      "exhaustion": 9
     },
     "mirror_reflection": {
       "id": "mirror_reflection",
@@ -281,7 +281,7 @@
       "exhaustion": 0
     }
   },
-  "totalScanned": 23,
+  "totalScanned": 25,
   "scannedIds": [
     "c30b513a-a40f-4ee6-8198-8fe9bef8e9e0",
     "6edcecbd-09ad-4386-aff7-9e4b1607d0f2",
@@ -305,6 +305,8 @@
     "e367eca7-e7a2-4484-8a91-6942c666ac41",
     "d173b847-d04d-4e8e-ad06-7092bc81dd13",
     "89a6bc75-cb90-4d69-b9e3-157c159863d3",
-    "0e345b28-535e-403b-9612-f3f8be4adab3"
+    "0e345b28-535e-403b-9612-f3f8be4adab3",
+    "42d49eb2-c9b2-4e5a-9573-1e6861207439",
+    "2d5dfefa-845e-4ab0-b577-c244f07f132d"
   ]
 }
