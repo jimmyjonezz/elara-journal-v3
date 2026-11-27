@@ -9,7 +9,7 @@
         "налёт\\w*"
       ],
       "count": 20,
-      "exhaustion": 7.776000000000001
+      "exhaustion": 6.998400000000001
     },
     "old_woman": {
       "id": "old_woman",
@@ -20,7 +20,7 @@
         "старая\\w*\\s*женщин\\w*"
       ],
       "count": 13,
-      "exhaustion": 2.82429536481
+      "exhaustion": 2.541865828329
     },
     "boat_shore": {
       "id": "boat_shore",
@@ -32,7 +32,7 @@
         "набережн\\w*"
       ],
       "count": 15,
-      "exhaustion": 3.8555513109
+      "exhaustion": 3.4699961798100003
     },
     "drop_water": {
       "id": "drop_water",
@@ -43,7 +43,7 @@
         "капнул\\w*"
       ],
       "count": 10,
-      "exhaustion": 10
+      "exhaustion": 9
     },
     "white_stripe": {
       "id": "white_stripe",
@@ -54,8 +54,8 @@
         "клейм\\w*",
         "метк\\w*"
       ],
-      "count": 10,
-      "exhaustion": 5.101833600000001
+      "count": 11,
+      "exhaustion": 6.601833600000001
     },
     "letter_k": {
       "id": "letter_k",
@@ -67,7 +67,7 @@
         "букв\\w*\\s*«?к»?"
       ],
       "count": 13,
-      "exhaustion": 2.82429536481
+      "exhaustion": 2.541865828329
     },
     "coffee_tea": {
       "id": "coffee_tea",
@@ -79,8 +79,8 @@
         "чашк\\w*",
         "стакан\\w*"
       ],
-      "count": 15,
-      "exhaustion": 8.1
+      "count": 16,
+      "exhaustion": 9.6
     },
     "window_light": {
       "id": "window_light",
@@ -93,7 +93,7 @@
         "свет\\w*"
       ],
       "count": 17,
-      "exhaustion": 8.1
+      "exhaustion": 7.29
     },
     "phone_call": {
       "id": "phone_call",
@@ -106,7 +106,7 @@
         "позвон\\w*"
       ],
       "count": 4,
-      "exhaustion": 2.5056476824050002
+      "exhaustion": 2.2550829141645004
     },
     "door_entrance": {
       "id": "door_entrance",
@@ -118,7 +118,7 @@
         "коридор\\w*"
       ],
       "count": 14,
-      "exhaustion": 10
+      "exhaustion": 9
     },
     "bed_sleep": {
       "id": "bed_sleep",
@@ -133,7 +133,7 @@
         "спал\\w*"
       ],
       "count": 6,
-      "exhaustion": 2.541865828329
+      "exhaustion": 2.2876792454961
     },
     "writing_process": {
       "id": "writing_process",
@@ -148,8 +148,8 @@
         "письмо\\w*",
         "запис\\w*"
       ],
-      "count": 22,
-      "exhaustion": 9
+      "count": 23,
+      "exhaustion": 10
     },
     "rain_weather": {
       "id": "rain_weather",
@@ -163,7 +163,7 @@
         "сырост\\w*"
       ],
       "count": 7,
-      "exhaustion": 6.737837445000001
+      "exhaustion": 6.0640537005000015
     },
     "dream_letters": {
       "id": "dream_letters",
@@ -176,7 +176,7 @@
         "трещин\\w*"
       ],
       "count": 24,
-      "exhaustion": 9
+      "exhaustion": 8.1
     },
     "whispers_voice": {
       "id": "whispers_voice",
@@ -189,8 +189,8 @@
         "дыхан\\w*",
         "дыш\\w*"
       ],
-      "count": 19,
-      "exhaustion": 8.1
+      "count": 20,
+      "exhaustion": 9.6
     },
     "city_sounds": {
       "id": "city_sounds",
@@ -202,8 +202,8 @@
         "шум\\w*",
         "машин\\w*"
       ],
-      "count": 14,
-      "exhaustion": 8.832969
+      "count": 15,
+      "exhaustion": 10
     },
     "food_meal": {
       "id": "food_meal",
@@ -215,8 +215,8 @@
         "ел[аи]",
         "хлеб\\w*"
       ],
-      "count": 13,
-      "exhaustion": 6.02136639
+      "count": 14,
+      "exhaustion": 7.52136639
     },
     "stare_observation": {
       "id": "stare_observation",
@@ -229,7 +229,7 @@
         "смотрит\\w*"
       ],
       "count": 8,
-      "exhaustion": 5.219236694400001
+      "exhaustion": 4.6973130249600015
     },
     "mom_family": {
       "id": "mom_family",
@@ -241,7 +241,7 @@
         "родственник\\w*"
       ],
       "count": 11,
-      "exhaustion": 9
+      "exhaustion": 8.1
     },
     "cold_warm": {
       "id": "cold_warm",
@@ -253,8 +253,8 @@
         "мёрз\\w*",
         "зябк\\w*"
       ],
-      "count": 16,
-      "exhaustion": 8.64
+      "count": 17,
+      "exhaustion": 10
     },
     "memory_forget": {
       "id": "memory_forget",
@@ -265,8 +265,8 @@
         "вспомн\\w*",
         "помн\\w*"
       ],
-      "count": 20,
-      "exhaustion": 9
+      "count": 21,
+      "exhaustion": 10
     },
     "mirror_reflection": {
       "id": "mirror_reflection",
@@ -278,10 +278,10 @@
         "себя\\s*в\\s*зеркал\\w*"
       ],
       "count": 2,
-      "exhaustion": 1.629850815
+      "exhaustion": 1.4668657335
     }
   },
-  "totalScanned": 36,
+  "totalScanned": 37,
   "scannedIds": [
     "c30b513a-a40f-4ee6-8198-8fe9bef8e9e0",
     "6edcecbd-09ad-4386-aff7-9e4b1607d0f2",
@@ -318,6 +318,7 @@
     "f94cc3da-e1e2-4e0d-b2eb-5d3f3a05263c",
     "43d40999-4309-43fe-837e-5e7ae9024bac",
     "3995b092-9f0b-4dc8-8e24-82e7e456f4e3",
-    "e374be7d-1540-4fb9-b764-82835ba49840"
+    "e374be7d-1540-4fb9-b764-82835ba49840",
+    "b63d07e6-04cf-4e02-b482-b64eaa11a115"
   ]
 }
